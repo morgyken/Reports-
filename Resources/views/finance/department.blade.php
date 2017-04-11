@@ -12,6 +12,7 @@ if (!isset($mode)) {
 $start = Illuminate\Support\Facades\Input::get('start');
 $end = Illuminate\Support\Facades\Input::get('end');
 $total = number_format(0, 2);
+$n = 0;
 
 $laboratory_amount = 0;
 $physio_amount = 0;
@@ -31,6 +32,7 @@ $optical_amount = 0;
         @if(!$investigations->isEmpty())
         <div class="box-header">
             {!! Form::open()!!}
+            <a href="" class="btn btn-xs btn-primary">Show all records</a>
             Clinic:
             <select name="clinic">
                 @foreach($clinics as $item)
@@ -86,6 +88,7 @@ $optical_amount = 0;
                 }
                 ?>
                 <tr id="payment{{$item->id}}">
+                    <td>{{$n+=1}}</td>
                     <td>
                         {{$item->payments?$item->payments->batch->receipt:''}}
                     </td>
@@ -116,6 +119,7 @@ $optical_amount = 0;
                 $total_i+= $item->price;
                 ?>
                 <tr id="payment{{$item->id}}">
+                    <td>{{$n+=1}}</td>
                     <td>{{$inv->invoice_no}}</td>
                     <td>{{$item->procedures->categories->name}}</td>
                     <td>
@@ -168,6 +172,7 @@ $optical_amount = 0;
                 try {
                     ?>
                     <tr id="payment{{$item->id}}">
+                        <td>{{$n+=1}}</td>
                         <td>
                             {{$item->payments?$item->payments->batch->receipt:''}}
                         </td>
@@ -205,6 +210,7 @@ $optical_amount = 0;
                 $total_i+= $item->price;
                 ?>
                 <tr id="payment{{$item->id}}">
+                    <td>{{$n+=1}}</td>
                     <td>{{$inv->invoice_no}}</td>
                     <td>{{$item->procedures->categories->name}}</td>
                     <td>
@@ -232,18 +238,20 @@ $optical_amount = 0;
 
                 @endif<!-- End of all-->
                 <tr>
-                    <td></td>
-                    <td style="text-align: right"><strong>Total (Insurance):</strong></td>
+                    <td>{{$n+=1}}</td>
+                    <td><strong>Totals:</strong></td>
+                    <td style="text-align: right"><strong>Insurance:</strong></td>
                     <td><strong>{{number_format($total_i,2)}}</strong></td>
                     <td></td>
                     <td></td>
-                    <td style="text-align: right"><strong>Total:</strong></td>
+                    <td style="text-align: right"><strong>Cash:</strong></td>
                     <td><strong>{{number_format($total,2)}}</strong></td>
                     <td></td>
                 </tr>
             </tbody>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Receipt/Invoice</th>
                     <th>Department</th>
                     <th>Type</th>
@@ -255,26 +263,46 @@ $optical_amount = 0;
             </thead>
         </table>
         <div>
-            <hr/>
-            <h4>Department summary</h4>
-            <table class="table table-striped">
-                <tr>
-                    <th>Laboratory</th>
-                    <th>Radiology</th>
-                    <th>Diagnostics</th>
-                    <th>Physiotherapy</th>
-                    <th>Theatre</th>
-                    <th>Optical</th>
-                </tr>
-                <tr>
-                    <td>{{number_format($laboratory_amount,2)}}</td>
-                    <td>{{number_format($radiology_amount,2)}}</td>
-                    <td>{{number_format($diagnostics_amount,2)}}</td>
-                    <td>{{number_format($physio_amount,2)}}</td>
-                    <td>{{number_format($theatre_amount,2)}}</td>
-                    <td>{{number_format($optical_amount,2)}}</td>
-                </tr>
-            </table>
+            <div class="col-md-6 col-sm-12 col-lg-6">
+                <hr/>
+                <h4>Department summary</h4>
+                <table class="table table-striped">
+                    <tr>
+                        <th>Laboratory</th>
+                        <th>Radiology</th>
+                        <th>Diagnostics</th>
+                        <th>Physiotherapy</th>
+                        <th>Theatre</th>
+                        <th>Optical</th>
+                    </tr>
+                    <tr>
+                        <td>{{number_format($laboratory_amount,2)}}</td>
+                        <td>{{number_format($radiology_amount,2)}}</td>
+                        <td>{{number_format($diagnostics_amount,2)}}</td>
+                        <td>{{number_format($physio_amount,2)}}</td>
+                        <td>{{number_format($theatre_amount,2)}}</td>
+                        <td>{{number_format($optical_amount,2)}}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6 col-sm-12 col-lg-6">
+                <hr/>
+                <h4>Total</h4>
+                <table class="table table-striped">
+                    <tr>
+                        <th>Cash | Credit Card | Mpesa | Cheque</th>
+                        <th>Insurance</th>
+                    </tr>
+                    <tr>
+                        <td>{{number_format($total,2)}}</td>
+                        <td>{{number_format($total_i,2)}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right"><strong>Total Amount:</strong></td>
+                        <td><strong>{{number_format($total_i+$total,2)}}</strong> </td>
+                    </tr>
+                </table>
+            </div>
         </div>
         @else
         <div class="alert alert-info">

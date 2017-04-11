@@ -32,7 +32,7 @@ $end = Illuminate\Support\Facades\Input::get('end');
             {!! Form::open()!!}
             Start Date: <input type="text" id="date1" name="start" value="{{$start}}"/>
             End Date: <input type="text" id="date2" name="end" value="{{$end}}"/>
-            Payment Mode: {!! Form::select('mode',mconfig('analytics.options.payment_modes'),null,['placeholder'=>'All'])!!}
+            Payment Mode: {!! Form::select('mode',mconfig('reports.options.payment_modes'),null,['placeholder'=>'All'])!!}
             <button  type="submit" id="clearBtn" class="btn btn-primary btn-xs">
                 <i class="fa fa-filter"></i> Filter
             </button>

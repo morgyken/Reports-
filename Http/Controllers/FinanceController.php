@@ -343,18 +343,18 @@ class FinanceController extends AdminBaseController {
                 ->get();
 
         if ($request->isMethod('post')) {
-            $temp = Investigations::query();
+            $temp = Investigations::query()->whereHas('doctors')->whereHas('payments')
+                    ->whereHas('visits');
+
             $temp_insurance = InsuranceInvoice::query();
             if ($request->has('start')) {
                 $temp->where('created_at', '>=', $request->start);
                 $temp_insurance->where('created_at', '>=', $request->start);
-                //$this->data['insurance'] = InsuranceInvoice::where('created_at', '>=', $request->end)->get();
                 $this->data['filter']['from'] = (new \Date($request->start))->format('jS M Y');
             }
             if ($request->has('end')) {
                 $temp->where('created_at', '<=', $request->end);
                 $temp_insurance->where('created_at', '<=', $request->start);
-                // $this->data['insurance'] = InsuranceInvoice::where('created_at', '<=', $request->end)->get();
                 $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
             }
 
@@ -410,7 +410,7 @@ class FinanceController extends AdminBaseController {
                     ->whereHas('payments')
                     ->whereHas('visits')
                     ->get();
-            $this->data['insurance'] = InsuranceInvoice::all();
+            $this->data['insurance'] = InsuranceInvoice::all(); //whereHas('payments')->get();
         }
 
         return view('reports::finance.doctor', ['data' => $this->data]);
