@@ -11,7 +11,7 @@ if (!isset($mode)) {
 }
 $start = Illuminate\Support\Facades\Input::get('start');
 $end = Illuminate\Support\Facades\Input::get('end');
-$total = number_format(0, 2);
+$total = 0; //number_format(0, 2);
 $n = 0;
 
 $laboratory_amount = 0;
@@ -89,9 +89,7 @@ $optical_amount = 0;
                 ?>
                 <tr id="payment{{$item->id}}">
                     <td>{{$n+=1}}</td>
-                    <td>
-                        {{$item->payments?$item->payments->batch->receipt:''}}
-                    </td>
+                    <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
                     <td>{{$item->procedures->categories->name}}</td>
                     <td>
                         @if($item->procedures->name =='Consultation')
@@ -153,7 +151,7 @@ $optical_amount = 0;
                 @if(isset($item->payments->batch->receipt))
                 <?php
                 $total+= $item->price;
-                $total+= $item->price;
+                //$total+= $item->price;
                 if ($item->procedures->categories->name == 'Lab') {
                     $laboratory_amount+=$item->price;
                 } elseif ($item->procedures->categories->name == 'Physiotherapy') {
@@ -185,7 +183,7 @@ $optical_amount = 0;
                             @endif
                         </td>
                         <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                        <td>{{smart_date_time($item->payments?$item->payments->batch->created_at:'')}}</td>
+                        <td>{{smart_date_time($item->created_at)}}</td>
                         <td>{{$item->price}}</td>
                         <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
                     </tr>
@@ -221,7 +219,7 @@ $optical_amount = 0;
                         @endif
                     </td>
                     <td>{{$item->visits->patients?$item->visits->patients->full_name:'-'}}</td>
-                    <td>{{smart_date_time($inv->created_at)}}</td>
+                    <td>{{smart_date_time($item->created_at)}}</td>
                     <td>{{$item->price}}</td>
                     <td>
                         Insurance
@@ -314,17 +312,17 @@ $optical_amount = 0;
 </div>
 <script type="text/javascript">
     $(function () {
+        $("#date1").datepicker({dateFormat: 'yy-mm-dd', onSelect: function (date) {
+                $("#date2").datepicker('option', 'minDate', date);
+            }});
+        $("#date2").datepicker({dateFormat: 'yy-mm-dd'});
+
         $('table').DataTable({
             dom: 'Bfrtip',
             buttons: [
                 'excel', 'pdf', 'print'
             ]
         });
-
-        $("#date1").datepicker({dateFormat: 'yy-mm-dd', onSelect: function (date) {
-                $("#date2").datepicker('option', 'minDate', date);
-            }});
-        $("#date2").datepicker({dateFormat: 'yy-mm-dd'});
 
     });
 </script>
