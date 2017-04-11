@@ -105,9 +105,7 @@ function get_doctor_total($name, $doctor, $amount) {
                         <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
                     </tr>
                     @endforeach
-                    <?php
-                } elseif ($mode == 'insurance') {//Disply Insurance Only
-                    ?>
+                <?php } elseif ($mode == 'insurance') {//Disply Insurance Only ?>
                     @if(!$insurance->isEmpty())
                     @foreach($insurance as $inv)
                     <?php $i_amount+=$inv->payment; ?>
