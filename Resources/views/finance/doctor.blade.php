@@ -8,11 +8,30 @@ extract($data);
 $start = Illuminate\Support\Facades\Input::get('start');
 $end = Illuminate\Support\Facades\Input::get('end');
 $total = number_format(0, 2);
+
+$cash_amnt = 0;
+$mpesa_amnt = 0;
+$cheq_amnt = 0;
+$card_amnt = 0;
+
 $i_amount = number_format(0, 2);
+$n = 0;
 if (!isset($mode)) {
     $mode = null;
 }
+
+function get_doctor_total($name, $doctor, $amount) {
+    $doctor_amount = array_combine($doctor, $amount);
+    $total = 0;
+    foreach ($doctor_amount as $key => $value) {
+        if (starts_with($key, $name)) {
+            $total+=$value;
+        }
+    }
+    return number_format($total, 2);
+}
 ?>
+
 @extends('layouts.app')
 @section('content_title','Revenue Per Doctor')
 @section('content_description','')
@@ -23,6 +42,7 @@ if (!isset($mode)) {
         @if(!$investigations->isEmpty())
         <div class="box-header">
             {!! Form::open()!!}
+            <a class="btn btn-xs btn-primary" href="">View all records</a>
             Clinic:
             <select name="clinic">
                 <option></option>
@@ -54,7 +74,6 @@ if (!isset($mode)) {
             {!! Form::close()!!}
         </div>
 
-
         <div class="alert alert-success">
             <i class="fa fa-info-circle"></i>
             {{filter_description($data['filter'])}}
@@ -63,18 +82,25 @@ if (!isset($mode)) {
         <table class="table table-condensed table-responsive table-striped" id="data">
             <tbody id="result">
                 <?php
+                $doctor = array();
+                $amount = array();
+                $i = 0;
                 if ($mode == 'cash') {//Disply Cash Only
                     ?>
                     @foreach($investigations as $item)
-                    <?php $total+= $item->price; ?>
+                    <?php
+                    $total+= $item->price;
+                    $i+=1;
+                    $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                    $amount[] = $item->price;
+                    ?>
                     <tr id="payment{{$item->id}}">
-                        <td>
-                            {{$item->payments?$item->payments->batch->receipt:''}}
-                        </td>
+                        <td>{{$n+=1}}</td>
+                        <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
                         <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
                         <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                        <td></td>
-                        <td>{{smart_date_time($item->payments?$item->payments->batch->created_at:'')}}</td>
+                        <td>{{$item->procedures->name}}</td>
+                        <td>{{smart_date_time($item->created_at)}}</td>
                         <td>{{$item->price}}</td>
                         <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
                     </tr>
@@ -87,16 +113,21 @@ if (!isset($mode)) {
                     <?php $i_amount+=$inv->payment; ?>
                     @if($inv->visits->doctor)
                     @if(isset($doc))
-                    @if($inv->visits->doctorID ==$doc)
+                    @if($inv->visits->doctorID ==$doc->id)
+                    @foreach($inv->visits->investigations as $item)
+                    <?php
+                    $i+=1;
+                    $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
+                    $amount[] = $item->price;
+                    ?>
                     <tr>
-                        <td>
-                            {{$inv->invoice_no}} ({{$doc}})
-                        </td>
+                        <td>{{$n+=1}}</td>
+                        <td>{{$inv->invoice_no}}</td>
                         <td>{{$inv->visits->doctor}}</td>
                         <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td></td>
-                        <td>{{(new Date($inv->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$inv->payment}}</td>
+                        <td>{{$item->procedures->name}}</td>
+                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                        <td>{{$item->price}}</td>
                         <td>
                             Insurance
                             @if(!$inv->payments->isEmpty())
@@ -106,17 +137,25 @@ if (!isset($mode)) {
                             @endif
                         </td>
                     </tr>
+                    @endforeach
                     @endif
                     @else
+
+                    @foreach($inv->visits->investigations as $item)
+                    <?php
+                    $i+=1;
+                    //$total+=$item->price;
+                    $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
+                    $amount[] = $item->price;
+                    ?>
                     <tr>
-                        <td>
-                            {{$inv->invoice_no}}
-                        </td>
+                        <td>{{$n+=1}}</td>
+                        <td>{{$inv->invoice_no}}</td>
                         <td>{{$inv->visits->doctor}}</td>
                         <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td></td>
-                        <td>{{(new Date($inv->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$inv->payment}}</td>
+                        <td>{{$item->procedures->name}}</td>
+                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                        <td>{{$item->price}}</td>
                         <td>
                             Insurance
                             @if(!$inv->payments->isEmpty())
@@ -126,6 +165,7 @@ if (!isset($mode)) {
                             @endif
                         </td>
                     </tr>
+                    @endforeach
 
                     @endif
                     @endif
@@ -136,20 +176,25 @@ if (!isset($mode)) {
                     ?>
                     @foreach($investigations as $item)
                     @if($item->visits->payment_mode!=='insurance')
-                    <?php $total+= $item->price; ?>
+                    <?php
+                    $total+= $item->price;
+                    $i+=1;
+                    $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                    $amount[] = $item->price;
+                    ?>
                     <tr id="payment{{$item->id}}">
-                        <td>
-                            {{$item->payments?$item->payments->batch->receipt:''}}
-                        </td>
+                        <td>{{$n+=1}}</td>
+                        <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
                         <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
                         <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                        <td></td>
-                        <td>{{(new Date($item->payments?$item->payments->batch->created_at:''))->format('jS M Y h:a A')}}</td>
+                        <td>{{$item->procedures->name}}</td>
+                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
                         <td>{{$item->price}}</td>
                         <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
                     </tr>
                     @endif
-                    @endforeach<!--End of Cash -->
+                    @endforeach
+                    <!--End of Cash -->
 
                     @if(!$insurance->isEmpty())
                     @foreach($insurance as $inv)
@@ -157,15 +202,20 @@ if (!isset($mode)) {
                     @if($inv->visits->doctor)
                     @if(isset($doc))
                     @if($inv->visits->doctorID ==$doc->id)
+                    @foreach($inv->visits->investigations as $item)
+                    <?php
+                    $i+=1;
+                    $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
+                    $amount[] = $item->price;
+                    ?>
                     <tr>
-                        <td>
-                            {{$inv->invoice_no}}
-                        </td>
+                        <td>{{$n+=1}}</td>
+                        <td>{{$inv->invoice_no}}</td>
                         <td>{{$inv->visits->doctor}}</td>
                         <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td></td>
-                        <td>{{(new Date($inv->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$inv->payment}}</td>
+                        <td>{{$item->procedures->name}}</td>
+                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                        <td>{{$item->price}}</td>
                         <td>
                             Insurance
                             @if(!$inv->payments->isEmpty())
@@ -175,16 +225,23 @@ if (!isset($mode)) {
                             @endif
                         </td>
                     </tr>
+                    @endforeach
                     @endif
                     @else
+                    @foreach($inv->visits->investigations as $item)
+                    <?php
+                    $i+=1;
+                    $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                    $amount[] = $item->price;
+                    ?>
                     <tr>
-                        <td>
-                            {{$inv->invoice_no}}
-                        </td>
+                        <td>{{$n+=1}}</td>
+                        <td>{{$inv->invoice_no}}</td>
                         <td>{{$inv->visits->doctor}}</td>
                         <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td>{{(new Date($inv->created_at))->format('jS M Y')}}</td>
-                        <td>{{$inv->payment}}</td>
+                        <td>{{$item->procedures->name}}</td>
+                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                        <td>{{$item->price}}</td>
                         <td>
                             Insurance
                             @if(!$inv->payments->isEmpty())
@@ -194,6 +251,7 @@ if (!isset($mode)) {
                             @endif
                         </td>
                     </tr>
+                    @endforeach
                     @endif
                     @endif
                     @endforeach
@@ -202,16 +260,19 @@ if (!isset($mode)) {
                 }
                 ?>
                 <tr>
-                    <td style="text-align: right"><strong>Total (Insurance):</strong></td>
+                    <td>{{$n+=1}}</td>
+                    <td><strong>Total:</strong></td>
+                    <td><strong>Insurance:</strong></td>
                     <td><strong>{{number_format($i_amount,2)}}</strong></td>
                     <td></td>
-                    <td style="text-align: right"><strong>Total (Cash):</strong></td>
+                    <td><strong>Cash</strong></td>
                     <td><strong>{{number_format($total,2)}}</strong></td>
                     <td></td>
                 </tr>
             </tbody>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Receipt/Invoice</th>
                     <th>Doctor</th>
                     <th>Patient</th>
@@ -222,6 +283,41 @@ if (!isset($mode)) {
                 </tr>
             </thead>
         </table>
+        <hr>
+        <div class="col-md-12 col-sm-12 col-lg-12">
+
+            <div class="col-md-6">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Doctor</th>
+                        <th>Amount</th>
+                    </tr>
+                    @foreach($data['doctors'] as $doc)
+                    <tr>
+                        <td><strong>{{$doc->profile->full_name}}:</strong> </td>
+                        <td><strong>{{get_doctor_total(str_slug($doc->profile->name),$doctor, $amount)}}</strong></td>
+                    </tr>
+                    @endforeach
+                </table>
+            </div>
+
+            <div class="col-md-6">
+                <table class="table table-striped">
+                    <tr>
+                        <th>Payment Mode</th>
+                        <th>Amount</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Cash: </strong></td>
+                        <td><strong>{{number_format($total,2)}}</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Insurance:</strong> </td>
+                        <td><strong>{{number_format($i_amount,2)}}</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
         @else
         <div class="alert alert-info">
             <p><i class="fa fa-info-circle"></i> No payment records found</p>
