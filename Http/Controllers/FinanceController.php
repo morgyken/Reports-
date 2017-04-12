@@ -345,8 +345,8 @@ class FinanceController extends AdminBaseController {
         if ($request->isMethod('post')) {
             $temp = Investigations::query()->whereHas('doctors')->whereHas('payments')
                     ->whereHas('visits');
-
             $temp_insurance = InsuranceInvoice::query();
+
             if ($request->has('start')) {
                 $temp->where('created_at', '>=', $request->start);
                 $temp_insurance->where('created_at', '>=', $request->start);
@@ -392,6 +392,7 @@ class FinanceController extends AdminBaseController {
                     });
                 })->get();
             }
+
             if ($request->has('mode')) {
                 if ($request->mode == 'cash') {
                     $this->data['mode'] = 'cash';
@@ -402,6 +403,7 @@ class FinanceController extends AdminBaseController {
                 }
                 $this->data['filter']['mode'] = ucfirst($request->mode);
             }
+
             $this->data['investigations'] = $temp->get();
             $this->data['insurance'] = $temp_insurance->get();
         } else {
@@ -411,6 +413,7 @@ class FinanceController extends AdminBaseController {
                     ->whereHas('visits')
                     ->get();
             $this->data['insurance'] = InsuranceInvoice::all(); //whereHas('payments')->get();
+            // dd($this->data['insurance']);
         }
 
         return view('reports::finance.doctor', ['data' => $this->data]);

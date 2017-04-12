@@ -89,32 +89,40 @@ function get_doctor_total($name, $doctor, $amount) {
                     ?>
                     @foreach($investigations as $item)
                     <?php
-                    $total+= $item->price;
-                    $i+=1;
-                    $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
-                    $amount[] = $item->price;
+                    try {
+                        $total+= $item->price;
+                        $i+=1;
+                        $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                        $amount[] = $item->price;
+                        ?>
+                        <tr id="payment{{$item->id}}">
+                            <td>{{$n+=1}}</td>
+                            <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
+                            <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
+                            <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
+                            <td>{{$item->procedures->name}}</td>
+                            <td>{{smart_date_time($item->created_at)}}</td>
+                            <td>{{$item->price}}</td>
+                            <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
+                        </tr>
+                        <?php
+                    } catch (\Exception $e) {
+                        //Leave it alone
+                    }
                     ?>
-                    <tr id="payment{{$item->id}}">
-                        <td>{{$n+=1}}</td>
-                        <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
-                        <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
-                        <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                        <td>{{$item->procedures->name}}</td>
-                        <td>{{smart_date_time($item->created_at)}}</td>
-                        <td>{{$item->price}}</td>
-                        <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
-                    </tr>
                     @endforeach
-                <?php } elseif ($mode == 'insurance') {//Disply Insurance Only ?>
+                <?php
+                } elseif ($mode == 'insurance') {
+                    //Disply Insurance Only
+                    ?>
                     @if(!$insurance->isEmpty())
                     @foreach($insurance as $inv)
-                    <?php $i_amount+=$inv->payment; ?>
-                    @if($inv->visits->doctor)
-                    @if(isset($doc))
+                    @if(isset($doc))<!--Insurance only for specific Doctor -->
                     @if($inv->visits->doctorID ==$doc->id)
                     @foreach($inv->visits->investigations as $item)
                     <?php
                     $i+=1;
+                    $i_amount+=$item->price;
                     $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
                     $amount[] = $item->price;
                     ?>
@@ -136,9 +144,7 @@ function get_doctor_total($name, $doctor, $amount) {
                         </td>
                     </tr>
                     @endforeach
-                    @endif
-                    @else
-
+                    @else <!--Insurance only for all Doctors -->
                     @foreach($inv->visits->investigations as $item)
                     <?php
                     $i+=1;
@@ -175,80 +181,101 @@ function get_doctor_total($name, $doctor, $amount) {
                     @foreach($investigations as $item)
                     @if($item->visits->payment_mode!=='insurance')
                     <?php
-                    $total+= $item->price;
-                    $i+=1;
-                    $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
-                    $amount[] = $item->price;
+                    try {
+                        $total+= $item->price;
+                        $i+=1;
+                        $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                        $amount[] = $item->price;
+                        ?>
+                        <tr id="payment{{$item->id}}">
+                            <td>{{$n+=1}}</td>
+                            <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
+                            <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
+                            <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
+                            <td>{{$item->procedures->name}}</td>
+                            <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                            <td>{{$item->price}}</td>
+                            <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
+                        </tr>
+                        <?php
+                    } catch (\Exception $ex) {
+
+                    }
                     ?>
-                    <tr id="payment{{$item->id}}">
-                        <td>{{$n+=1}}</td>
-                        <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
-                        <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
-                        <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                        <td>{{$item->procedures->name}}</td>
-                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$item->price}}</td>
-                        <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
-                    </tr>
                     @endif
                     @endforeach
                     <!--End of Cash -->
 
                     @if(!$insurance->isEmpty())
                     @foreach($insurance as $inv)
-                    <?php $i_amount+=$inv->payment; ?>
-                    @if($inv->visits->doctor)
+                    <!--DISPLY FOR SPECIFIC DOCTOR -->
                     @if(isset($doc))
                     @if($inv->visits->doctorID ==$doc->id)
                     @foreach($inv->visits->investigations as $item)
                     <?php
-                    $i+=1;
-                    $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
-                    $amount[] = $item->price;
+                    try {
+                        $i_amount+=$item->price;
+                        $i+=1;
+                        $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
+                        $amount[] = $item->price;
+                        ?>
+                        <tr>
+                            <td>{{$n+=1}}</td>
+                            <td>{{$inv->invoice_no}}</td>
+                            <td>{{$inv->visits->doctor}}</td>
+                            <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
+                            <td>{{$item->procedures->name}}</td>
+                            <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                            <td>{{$item->price}}</td>
+                            <td>
+                                Insurance
+                                @if(!$inv->payments->isEmpty())
+                                (paid)
+                                @else
+                                (unpaid)
+                                @endif
+                            </td>
+                        </tr>
+                        <?php
+                    } catch (\Exception $e) {
+
+                    }
                     ?>
-                    <tr>
-                        <td>{{$n+=1}}</td>
-                        <td>{{$inv->invoice_no}}</td>
-                        <td>{{$inv->visits->doctor}}</td>
-                        <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td>{{$item->procedures->name}}</td>
-                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$item->price}}</td>
-                        <td>
-                            Insurance
-                            @if(!$inv->payments->isEmpty())
-                            (paid)
-                            @else
-                            (unpaid)
-                            @endif
-                        </td>
-                    </tr>
                     @endforeach
-                    @endif
                     @else
                     @foreach($inv->visits->investigations as $item)
+                    <!--DISPLY FOR ALL DOCTORS -->
                     <?php
-                    $i+=1;
-                    $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
-                    $amount[] = $item->price;
+                    try {
+                        if ($inv->visits->doctor !== '') {
+                            $i_amount+=$item->price;
+                            $i+=1;
+                            $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                            $amount[] = $item->price;
+                            ?>
+                            <tr>
+                                <td>{{$n+=1}}</td>
+                                <td>{{$inv->invoice_no}}</td>
+                                <td>{{$inv->visits->doctor}}</td>
+                                <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
+                                <td>{{$item->procedures->name}}</td>
+                                <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                                <td>{{$item->price}}</td>
+                                <td>
+                                    Insurance
+                                    @if(!$inv->payments->isEmpty())
+                                    (paid)
+                                    @else
+                                    (unpaid)
+                                    @endif
+                                </td>
+                            </tr>
+                            <?php
+                        }//Endif
+                    } catch (\Exception $ex) {
+
+                    }
                     ?>
-                    <tr>
-                        <td>{{$n+=1}}</td>
-                        <td>{{$inv->invoice_no}}</td>
-                        <td>{{$inv->visits->doctor}}</td>
-                        <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td>{{$item->procedures->name}}</td>
-                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$item->price}}</td>
-                        <td>
-                            Insurance
-                            @if(!$inv->payments->isEmpty())
-                            (paid)
-                            @else
-                            (unpaid)
-                            @endif
-                        </td>
-                    </tr>
                     @endforeach
                     @endif
                     @endif
