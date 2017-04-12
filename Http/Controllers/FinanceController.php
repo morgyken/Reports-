@@ -354,7 +354,7 @@ class FinanceController extends AdminBaseController {
             }
             if ($request->has('end')) {
                 $temp->where('created_at', '<=', $request->end);
-                $temp_insurance->where('created_at', '<=', $request->start);
+                $temp_insurance->where('created_at', '<=', $request->end);
                 $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
             }
 

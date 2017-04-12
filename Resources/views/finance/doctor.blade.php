@@ -111,7 +111,7 @@ function get_doctor_total($name, $doctor, $amount) {
                     }
                     ?>
                     @endforeach
-                <?php
+                    <?php
                 } elseif ($mode == 'insurance') {
                     //Disply Insurance Only
                     ?>
@@ -132,7 +132,7 @@ function get_doctor_total($name, $doctor, $amount) {
                         <td>{{$inv->visits->doctor}}</td>
                         <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
                         <td>{{$item->procedures->name}}</td>
-                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                        <td>{{(new Date($inv->created_at))->format('jS M Y h:a A')}}</td>
                         <td>{{$item->price}}</td>
                         <td>
                             Insurance
@@ -147,28 +147,30 @@ function get_doctor_total($name, $doctor, $amount) {
                     @else <!--Insurance only for all Doctors -->
                     @foreach($inv->visits->investigations as $item)
                     <?php
-                    $i+=1;
-                    //$total+=$item->price;
-                    $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
-                    $amount[] = $item->price;
-                    ?>
-                    <tr>
-                        <td>{{$n+=1}}</td>
-                        <td>{{$inv->invoice_no}}</td>
-                        <td>{{$inv->visits->doctor}}</td>
-                        <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
-                        <td>{{$item->procedures->name}}</td>
-                        <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
-                        <td>{{$item->price}}</td>
-                        <td>
-                            Insurance
-                            @if(!$inv->payments->isEmpty())
-                            (paid)
-                            @else
-                            (unpaid)
-                            @endif
-                        </td>
-                    </tr>
+                    if ($inv->visits->doctor !== '') {
+                        $i+=1;
+                        $i_amount+=$item->price;
+                        $doctor[] = str_slug($inv->visits->doctor) . '_' . $i;
+                        $amount[] = $item->price;
+                        ?>
+                        <tr>
+                            <td>{{$n+=1}}</td>
+                            <td>{{$inv->invoice_no}}</td>
+                            <td>{{$inv->visits->doctor}}</td>
+                            <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
+                            <td>{{$item->procedures->name}}</td>
+                            <td>{{(new Date($inv->created_at))->format('jS M Y h:a A')}}</td>
+                            <td>{{$item->price}}</td>
+                            <td>
+                                Insurance
+                                @if(!$inv->payments->isEmpty())
+                                (paid)
+                                @else
+                                (unpaid)
+                                @endif
+                            </td>
+                        </tr>
+                    <?php } ?>
                     @endforeach
 
                     @endif
@@ -225,7 +227,7 @@ function get_doctor_total($name, $doctor, $amount) {
                             <td>{{$inv->visits->doctor}}</td>
                             <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
                             <td>{{$item->procedures->name}}</td>
-                            <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                            <td>{{(new Date($inv->created_at))->format('jS M Y h:a A')}}</td>
                             <td>{{$item->price}}</td>
                             <td>
                                 Insurance
@@ -259,7 +261,7 @@ function get_doctor_total($name, $doctor, $amount) {
                                 <td>{{$inv->visits->doctor}}</td>
                                 <td>{{$inv->visits->patients?$inv->visits->patients->full_name:''}}</td>
                                 <td>{{$item->procedures->name}}</td>
-                                <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                                <td>{{(new Date($inv->created_at))->format('jS M Y h:a')}}</td>
                                 <td>{{$item->price}}</td>
                                 <td>
                                     Insurance
