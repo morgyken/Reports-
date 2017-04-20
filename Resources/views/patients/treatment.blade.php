@@ -38,16 +38,24 @@ extract($data);
         <table class="table table-striped">
             <tbody id="result">
                 @foreach($investigations as $procedure)
+                <?php
+                // try {
+                // $procedure->visits->patients;
+                ?>
                 <tr>
                     <td>{{$procedure->id}}</td>
                     <td>{{$procedure->procedures->name}}</td>
                     <td>{{$procedure->visits?$procedure->visits->patients->first_name:''}}</td>
                     <td>{{smart_date_time($procedure->created_at)}}</td>
                     <td>{{$procedure->visits?$procedure->visits->clinics->name:''}}</td>
-                    <td>{{$procedure->doctors->profile->full_name}}</td>
+                    <td>{{$procedure->doctors?$procedure->doctors->profile->full_name:''}}</td>
                     <td>{{$procedure->pesa}}</td>
                     <td>{{$procedure->visits?$procedure->visits->payment_mode:''}}</td>
                 </tr>
+                <?php
+                //  } catch (\Exception $ex) {
+                //  }
+                ?>
                 @endforeach
             </tbody>
             <thead>
@@ -79,7 +87,7 @@ extract($data);
         $(document).ready(function () {
             $.ajax({
                 type: 'get',
-                url: "{{route('api.analytics.diagnoses.clinic')}}",
+                url: "{{route('api.reports.diagnoses.clinic')}}",
                 data: {'type': type, 'value': value},
                 dataType: 'html',
                 success: function (response) {

@@ -2,7 +2,6 @@
 
 namespace Ignite\Reports\Http\Controllers;
 
-use Ignite\Reports\Library\Charts;
 use Ignite\Core\Http\Controllers\AdminBaseController;
 use Ignite\Evaluation\Entities\Investigations;
 use Ignite\Evaluation\Entities\Prescriptions;
@@ -18,7 +17,7 @@ class PatientController extends AdminBaseController {
      */
     public function procedures() {
         $this->data['investigations'] = Investigations::where('type', '<>', 'treatment')->get();
-        Charts::procedureCharts($this->data['investigations']);
+        //Charts::procedureCharts($this->data['investigations']);
         return view('reports::patients.procedures', ['data' => $this->data]);
     }
 
@@ -38,7 +37,7 @@ class PatientController extends AdminBaseController {
 
     public function visits() {
         $this->data['visits'] = Visit::all();
-        Charts::visitCharts($this->data['visits']);
+        //Charts::visitCharts($this->data['visits']);
         return view('reports::patients.visits', ['data' => $this->data]);
     }
 

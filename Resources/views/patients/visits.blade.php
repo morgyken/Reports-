@@ -40,7 +40,6 @@ extract($data);
         </table>
     </div>
 </div>
-@columnchart('visitCharts', 'chart_space')
 <script type="text/javascript">
     $(function () {
         $('table').DataTable({

@@ -17,16 +17,26 @@ extract($data);
         <table class="table table-striped">
             <tbody>
                 @foreach($investigations as $procedure)
-                <tr>
-                    <td>{{$procedure->id}}</td>
-                    <td>{{$procedure->procedures->name}}</td>
-                    <td>{{$procedure->visits->patients->full_name}}</td>
-                    <td>{{smart_date_time($procedure->created_at)}}</td>
-                    <td>{{$procedure->visits->clinics->name}}</td>
-                    <td>{{ucfirst($procedure->type)}}</td>
-                    <td>{{$procedure->pesa}}</td>
-                    <td>{{$procedure->visits->payment_mode}}</td>
-                </tr>
+                <?php
+                try {
+                    $procedure->visits->patients
+                    ?>
+                    <tr>
+                        <td>{{$procedure->id}}</td>
+                        <td>{{$procedure->procedures->name}}</td>
+                        <td>{{$procedure->visits->patients->full_name}}</td>
+                        <td>{{smart_date_time($procedure->created_at)}}</td>
+                        <td>{{$procedure->visits->clinics->name}}</td>
+                        <td>{{ucfirst($procedure->type)}}</td>
+                        <td>{{$procedure->pesa}}</td>
+                        <td>{{$procedure->visits->payment_mode}}</td>
+                    </tr>
+                    <?php
+                } catch (\Exception $ex) {
+                    //Fuck that error
+                    dd($procedure);
+                }
+                ?>
                 @endforeach
             </tbody>
             <thead>
@@ -44,7 +54,6 @@ extract($data);
         </table>
     </div>
 </div>
-@barchart('procedureCharts', 'chart_space')
 <script type="text/javascript">
     $(function () {
         $('table').DataTable({
