@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-namespace Ignite\Analytics\Library;
+namespace Ignite\Reports\Library;
 
 use Lava;
 
@@ -24,7 +24,7 @@ class Charts {
         foreach ($data as $item) {
             $procedures->addRow([$item->procedures->name, $item->price]);
         }
-        Lava::BarChart('procedureCharts', $procedures, [
+        \Khill\Lavacharts\Lavacharts::BarChart('procedureCharts', $procedures, [
             'title' => 'Procedures Report',
             'titleTextStyle' => [
                 'color' => '#eb6b2c',
@@ -34,7 +34,7 @@ class Charts {
     }
 
     public static function visitCharts($visits) {
-        $finances = Lava::DataTable();
+        $finances = \Khill\Lavacharts\Lavacharts::DataTable();
         $finances->addDateColumn('Month');
         $clinics = get_clinics();
         foreach ($clinics as $clinic) {
@@ -43,7 +43,7 @@ class Charts {
         foreach ($visits as $visit) {
             $finances->addRow([$visit->created_at, $visits->where('clinic', 1)->count(), $visits->where('clinic', 2)->count()]);
         }
-        Lava::ColumnChart('visitCharts', $finances, [
+        \Khill\Lavacharts\Lavacharts::ColumnChart('visitCharts', $finances, [
             'title' => 'Clinic Performance',
             'titleTextStyle' => [
                 'color' => '#eb6b2c',
