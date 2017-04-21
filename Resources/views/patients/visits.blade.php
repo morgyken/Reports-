@@ -40,12 +40,13 @@ extract($data);
         </table>
     </div>
 </div>
+
 <script type="text/javascript">
     $(function () {
         $('table').DataTable({
             dom: 'Bfrtip',
             buttons: [
-                'excel', 'pdf'
+                'excel', 'pdf', 'print'
             ]
         });
     });
