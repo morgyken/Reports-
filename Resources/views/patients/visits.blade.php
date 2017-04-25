@@ -17,14 +17,20 @@ extract($data);
         <table class="table table-striped">
             <tbody>
                 @foreach($visits as $visit)
-                <tr>
-                    <td>{{$visit->id}}</td>
-                    <td>{{$visit->patients->full_name}}</td>
-                    <td>{{$visit->clinics->name}}</td>
-                    <td>{{$visit->visit_destination}}</td>
-                    <td>{{$visit->mode}}</td>
-                    <td>{{smart_date($visit->created_at)}}</td>
-                </tr>
+                <?php try { ?>
+                    <tr>
+                        <td>{{$visit->id}}</td>
+                        <td>{{$visit->patients->full_name}}</td>
+                        <td>{{$visit->clinics->name}}</td>
+                        <td>{{$visit->visit_destination}}</td>
+                        <td>{{$visit->mode}}</td>
+                        <td>{{smart_date($visit->created_at)}}</td>
+                    </tr>
+                    <?php
+                } catch (Exception $ex) {
+
+                }
+                ?>
                 @endforeach
             </tbody>
             <thead>
