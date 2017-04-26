@@ -63,6 +63,16 @@ class FinanceController extends AdminBaseController {
                 $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
             }
 
+            //For specific date
+            if ($request->has('date')) {
+                $temp_cash->where('created_at', '==', $request->date);
+                $temp_card->where('created_at', '==', $request->date);
+                $temp_cheque->where('created_at', '==', $request->date);
+                $temp_mpesa->where('created_at', '==', $request->date);
+                $temp_insurance->where('created_at', '==', $request->date);
+                $this->data['filter']['date'] = (new \Date($request->date))->format('jS M Y');
+            }
+
             $this->query_payments_doctor(
                     $request, $temp_cash, $temp_card, $temp_cheque, $temp_mpesa, $temp_insurance
             );
@@ -261,6 +271,17 @@ class FinanceController extends AdminBaseController {
                 $temp_insurance->where('created_at', '<=', $request->end);
                 $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
             }
+
+
+            if ($request->has('date')) {
+                $temp_cash->where('created_at', '==', $request->date);
+                $temp_card->where('created_at', '==', $request->date);
+                $temp_cheque->where('created_at', '==', $request->date);
+                $temp_mpesa->where('created_at', '==', $request->date);
+                $temp_insurance->where('created_at', '==', $request->date);
+                $this->data['filter']['for'] = (new \Date($request->date))->format('jS M Y');
+            }
+
             $this->data['cash'] = $temp_cash->get();
             $this->data['card'] = $temp_card->get();
             $this->data['cheque'] = $temp_cheque->get();
@@ -301,6 +322,17 @@ class FinanceController extends AdminBaseController {
                 $temp_insurance->where('created_at', '<=', $request->end);
                 $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
             }
+
+
+            if ($request->has('date')) {
+                //$temp->where('created_at', '<=', $request->end);
+                $temp_card->where('created_at', '==', $request->date);
+                $temp_cheque->where('created_at', '==', $request->date);
+                $temp_mpesa->where('created_at', '==', $request->date);
+                $temp_insurance->where('created_at', '==', $request->date);
+                $this->data['filter']['for'] = (new \Date($request->date))->format('jS M Y');
+            }
+
             if ($request->has('mode')) {
                 if ($request->mode != 'all') {
                     if ($request->mode == 'cash') {
@@ -352,10 +384,20 @@ class FinanceController extends AdminBaseController {
                 $temp_insurance->where('created_at', '>=', $request->start);
                 $this->data['filter']['from'] = (new \Date($request->start))->format('jS M Y');
             }
+
             if ($request->has('end')) {
                 $temp->where('created_at', '<=', $request->end);
                 $temp_insurance->where('created_at', '<=', $request->end);
                 $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
+            }
+
+            if ($request->end == $request->start) {
+                $date = $request->start;
+                //dd($date);
+                //$temp->where('created_at', '==', $date);
+                $temp->whereDate('created_at', '=', $date);
+                $temp_insurance->where('created_at', '=', $date);
+                $this->data['filter']['for'] = (new \Date($date))->format('jS M Y');
             }
 
             if ($request->has('medic')) {
@@ -436,6 +478,12 @@ class FinanceController extends AdminBaseController {
                     $temp->where('created_at', '<=', $request->end);
                     $temp_insurance->where('created_at', '<=', $request->end);
                     $this->data['filter']['to'] = (new \Date($request->end))->format('jS M Y');
+                }
+
+                if ($request->has('date')) {
+                    $temp->where('created_at', '==', $request->date);
+                    $temp_insurance->where('created_at', '==', $request->date);
+                    $this->data['filter']['For'] = (new \Date($request->date))->format('jS M Y');
                 }
 
                 if ($request->has('department')) {
@@ -534,6 +582,19 @@ class FinanceController extends AdminBaseController {
                     $query->whereHas('visits', function($query2) {
                         $query2->whereHas('investigations', function($query3) {
                             $query3->where('created_at', '<=', \Session::get('to'));
+                        });
+                    });
+                });
+            }
+
+
+            if ($request->has('date')) {
+                $this->data['filter']['for'] = (new \Date($request->date))->format('jS M Y');
+                session(['date' => ucfirst($request->date)]);
+                $temp->whereHas('invoice', function($query) {
+                    $query->whereHas('visits', function($query2) {
+                        $query2->whereHas('investigations', function($query3) {
+                            $query3->where('created_at', '==', \Session::get('date'));
                         });
                     });
                 });

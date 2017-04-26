@@ -65,6 +65,7 @@ function get_doctor_total($name, $doctor, $amount) {
                 <option value="{{$doc->id}}">{{$doc->profile->full_name}}</option>
                 @endforeach
             </select>
+
             Start Date:
             <input type="text" id="date1" name="start" value="{{$start}}"/>
             End Date:
@@ -359,6 +360,8 @@ function get_doctor_total($name, $doctor, $amount) {
                 $("#date2").datepicker('option', 'minDate', date);
             }});
         $("#date2").datepicker({dateFormat: 'yy-mm-dd'});
+
+        $("#date").datepicker({dateFormat: 'yy-mm-dd'});
 
         $('table').DataTable({
             dom: 'Bfrtip',
