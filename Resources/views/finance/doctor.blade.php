@@ -91,22 +91,24 @@ function get_doctor_total($name, $doctor, $amount) {
                     @foreach($investigations as $item)
                     <?php
                     try {
-                        $total+= $item->amount > 0 ? $item->amount : $item->price;
-                        $i+=1;
-                        $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
-                        $amount[] = $item->amount > 0 ? $item->amount : $item->price;
-                        ?>
-                        <tr id="payment{{$item->id}}">
-                            <td>{{$n+=1}}</td>
-                            <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
-                            <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
-                            <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                            <td>{{$item->procedures->name}}</td>
-                            <td>{{smart_date_time($item->created_at)}}</td>
-                            <td>{{$item->amount>0?$item->amount:$item->price}}</td>
-                            <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
-                        </tr>
-                        <?php
+                        if ($item->type == 'treatment' || $item->type == 'doctor') {
+                            $total+= $item->amount > 0 ? $item->amount : $item->price;
+                            $i+=1;
+                            $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                            $amount[] = $item->amount > 0 ? $item->amount : $item->price;
+                            ?>
+                            <tr id="payment{{$item->id}}">
+                                <td>{{$n+=1}}</td>
+                                <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
+                                <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
+                                <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
+                                <td>{{$item->procedures->name}}</td>
+                                <td>{{smart_date_time($item->created_at)}}</td>
+                                <td>{{$item->amount>0?$item->amount:$item->price}}</td>
+                                <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
+                            </tr>
+                            <?php
+                        }
                     } catch (\Exception $e) {
                         //Leave it alone
                     }
@@ -185,22 +187,24 @@ function get_doctor_total($name, $doctor, $amount) {
                     @if($item->visits->payment_mode!=='insurance')
                     <?php
                     try {
-                        $total+= $item->amount > 0 ? $item->amount : $item->price;
-                        $i+=1;
-                        $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
-                        $amount[] = $item->amount > 0 ? $item->amount : $item->price;
-                        ?>
-                        <tr id="payment{{$item->id}}">
-                            <td>{{$n+=1}}</td>
-                            <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
-                            <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
-                            <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
-                            <td>{{$item->procedures->name}}</td>
-                            <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
-                            <td>{{$item->amount>0?$item->amount:$item->price}}</td>
-                            <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
-                        </tr>
+                        if ($item->type == 'treatment' || $item->type == 'doctor') {
+                            $total+= $item->amount > 0 ? $item->amount : $item->price;
+                            $i+=1;
+                            $doctor[] = str_slug($item->doctors->profile->name) . '_' . $i;
+                            $amount[] = $item->amount > 0 ? $item->amount : $item->price;
+                            ?>
+                            <tr id="payment{{$item->id}}">
+                                <td>{{$n+=1}}</td>
+                                <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
+                                <td>{{$item->doctors?$item->doctors->profile->name:''}}</td>
+                                <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
+                                <td>{{$item->procedures->name}}</td>
+                                <td>{{(new Date($item->created_at))->format('jS M Y h:a A')}}</td>
+                                <td>{{$item->amount>0?$item->amount:$item->price}}</td>
+                                <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
+                            </tr>
                         <?php
+                        }
                     } catch (\Exception $ex) {
 
                     }
