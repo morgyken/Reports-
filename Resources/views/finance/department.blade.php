@@ -21,6 +21,9 @@ $diagnostics_amount = 0;
 $radiology_amount = 0;
 $pharmacy_amount = 0;
 $optical_amount = 0;
+$nursing_amount = 0;
+$doctor_amount = 0;
+$ultrasound_amount = 0;
 ?>
 @extends('layouts.app')
 @section('content_title','Revenue per Department')
@@ -70,37 +73,45 @@ $optical_amount = 0;
                 @if($item->visits->payment_mode!=='insurance')
                 @if(isset($item->payments->batch->receipt))
                 <?php
-                $total+= $item->price;
-                if ($item->procedures->categories->name == 'Lab') {
-                    $laboratory_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Physiotherapy') {
-                    $physio_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Theatre') {
-                    $theatre_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Diagnostics') {
-                    $diagnostics_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Radiology') {
-                    $radiology_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Optical') {
-                    $optical_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Pharmacy') {
-                    $pharmacy_amount+=$item->price;
+                $total+= $item->amount > 0 ? $item->amount : $item->price;
+                if ($item->type == 'laboratory') {
+                    $laboratory_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'physiotherapy') {
+                    $physio_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'theatre') {
+                    $theatre_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'diagnostics') {
+                    $diagnostics_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'radiology') {
+                    $radiology_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'optical') {
+                    $optical_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'pharmacy') {
+                    $pharmacy_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'nursing') {
+                    $nursing_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'treatment') {
+                    $doctor_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'doctor') {
+                    $doctor_amount+=$item->amount > 0 ? $item->amount : $item->price;
                 }
                 ?>
                 <tr id="payment{{$item->id}}">
                     <td>{{$n+=1}}</td>
                     <td>{{$item->payments?$item->payments->batch->receipt:''}}</td>
-                    <td>{{$item->procedures->categories->name}}</td>
                     <td>
-                        @if($item->procedures->name =='Consultation')
-                        Consultation
+                        @if($item->type =='treatment')
+                        Doctor
                         @else
-                        {{$item->type}}
+                        {{ucfirst($item->type)}}
                         @endif
+                    </td>
+                    <td>
+                        {{$item->procedures->name}}
                     </td>
                     <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
                     <td>{{smart_date_time($item->payments?$item->payments->batch->created_at:'')}}</td>
-                    <td>{{$item->price}}</td>
+                    <td>{{$item->amount>0?$item->amount:$item->price}}</td>
                     <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
                 </tr>
                 @endif
@@ -114,22 +125,24 @@ $optical_amount = 0;
                 @foreach($insurance as $inv)
                 @foreach($inv->visits->investigations as $item)
                 <?php
-                $total_i+= $item->price;
+                $total_i+= $item->amount > 0 ? $item->amount : $item->price;
                 ?>
                 <tr id="payment{{$item->id}}">
                     <td>{{$n+=1}}</td>
                     <td>{{$inv->invoice_no}}</td>
-                    <td>{{$item->procedures->categories->name}}</td>
                     <td>
-                        @if($item->procedures->name =='Consultation')
-                        Consultation
+                        @if($item->type =='treatment')
+                        Doctor
                         @else
-                        {{$item->type}}
+                        {{ucfirst($item->type)}}
                         @endif
+                    </td>
+                    <td>
+                        $item->procedures->name
                     </td>
                     <td>{{$item->visits->patients?$item->visits->patients->full_name:'-'}}</td>
                     <td>{{smart_date_time($inv->created_at)}}</td>
-                    <td>{{$item->price}}</td>
+                    <td>{{$item->amount>0?$item->amount:$item->price}}</td>
                     <td>
                         Insurance
                         @if(!$inv->payments->isEmpty())
@@ -150,22 +163,27 @@ $optical_amount = 0;
                 @if($item->visits->payment_mode!=='insurance')
                 @if(isset($item->payments->batch->receipt))
                 <?php
-                $total+= $item->price;
-                //$total+= $item->price;
-                if ($item->procedures->categories->name == 'Lab') {
-                    $laboratory_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Physiotherapy') {
-                    $physio_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Theatre') {
-                    $theatre_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Diagnostics') {
-                    $diagnostics_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Radiology') {
-                    $radiology_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Optical') {
-                    $optical_amount+=$item->price;
-                } elseif ($item->procedures->categories->name == 'Pharmacy') {
-                    $pharmacy_amount+=$item->price;
+                $total+= $item->amount > 0 ? $item->amount : $item->price;
+                if ($item->type == 'laboratory') {
+                    $laboratory_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'physiotherapy') {
+                    $physio_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'theatre') {
+                    $theatre_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'diagnostics') {
+                    $diagnostics_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'radiology') {
+                    $radiology_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'optical') {
+                    $optical_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'pharmacy') {
+                    $pharmacy_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'nursing') {
+                    $nursing_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'treatment') {
+                    $doctor_amount+=$item->amount > 0 ? $item->amount : $item->price;
+                } elseif ($item->type == 'doctor') {
+                    $doctor_amount+=$item->amount > 0 ? $item->amount : $item->price;
                 }
                 try {
                     ?>
@@ -174,17 +192,16 @@ $optical_amount = 0;
                         <td>
                             {{$item->payments?$item->payments->batch->receipt:''}}
                         </td>
-                        <td>{{$item->procedures?$item->procedures->categories->name:''}}</td>
                         <td>
-                            @if($item->procedures->name =='Consultation')
-                            Consultation
+                            @if($item->type =='treatment')
+                            Doctor
                             @else
-                            {{$item->type}}
-                            @endif
-                        </td>
+                            {{ucfirst($item->type)}}
+                            @endif</td>
+                        <td>{{$item->procedures->name}}</td>
                         <td>{{$item->visits->patients?$item->visits->patients->full_name:''}}</td>
                         <td>{{smart_date_time($item->created_at)}}</td>
-                        <td>{{$item->price}}</td>
+                        <td>{{$item->amount>0?$item->amount:$item->price}}</td>
                         <td>{{$item->payments?$item->payments->batch->modes:''}}</td>
                     </tr>
                     <?php
@@ -205,22 +222,22 @@ $optical_amount = 0;
                 @foreach($insurance as $inv)
                 @foreach($inv->visits->investigations as $item)
                 <?php
-                $total_i+= $item->price;
+                $total_i+= $item->amount > 0 ? $item->amount : $item->price;
                 ?>
                 <tr id="payment{{$item->id}}">
                     <td>{{$n+=1}}</td>
                     <td>{{$inv->invoice_no}}</td>
-                    <td>{{$item->procedures->categories->name}}</td>
                     <td>
-                        @if($item->procedures->name =='Consultation')
-                        Consultation
+                        @if($item->type =='treatment')
+                        Doctor
                         @else
-                        {{$item->type}}
+                        {{ucfirst($item->type)}}
                         @endif
                     </td>
+                    <td>{{$item->procedures->name}}</td>
                     <td>{{$item->visits->patients?$item->visits->patients->full_name:'-'}}</td>
                     <td>{{smart_date_time($item->created_at)}}</td>
-                    <td>{{$item->price}}</td>
+                    <td>{{$item->amount>0?$item->amount:$item->price}}</td>
                     <td>
                         Insurance
                         @if(!$inv->payments->isEmpty())
@@ -252,7 +269,7 @@ $optical_amount = 0;
                     <th>#</th>
                     <th>Receipt/Invoice</th>
                     <th>Department</th>
-                    <th>Type</th>
+                    <th>Procedure</th>
                     <th>Patient</th>
                     <th>Date</th>
                     <th>Amount</th>
@@ -260,39 +277,65 @@ $optical_amount = 0;
                 </tr>
             </thead>
         </table>
-        <div>
+
+        <div class="col-md-12 col-sm-12 col-lg-12">
             <div class="col-md-6 col-sm-12 col-lg-6">
                 <hr/>
                 <h4>Department summary</h4>
                 <table class="table table-striped">
                     <tr>
                         <th>Laboratory</th>
-                        <th>Radiology</th>
-                        <th>Diagnostics</th>
-                        <th>Physiotherapy</th>
-                        <th>Theatre</th>
-                        <th>Optical</th>
+                        <td style="text-align: left">
+                            {{number_format($laboratory_amount,2)}}
+                        </td>
                     </tr>
                     <tr>
-                        <td>{{number_format($laboratory_amount,2)}}</td>
+                        <th>Radiology</th>
                         <td>{{number_format($radiology_amount,2)}}</td>
+                    </tr>
+                    <tr>
+                        <th>Diagnostics</th>
                         <td>{{number_format($diagnostics_amount,2)}}</td>
+                    </tr>
+                    <tr>
+                        <th>Physiotherapy</th>
                         <td>{{number_format($physio_amount,2)}}</td>
+                    </tr>
+                    <tr>
+                        <th>Theatre</th>
                         <td>{{number_format($theatre_amount,2)}}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Nursing</th>
+                        <td>{{number_format($nursing_amount,2)}}</td>
+                    </tr>
+                    <tr>
+                        <th>Doctor</th>
+                        <td>{{number_format($doctor_amount,2)}}</td>
+                    </tr>
+                    @if(m_setting('evaluation.eye'))
+                    <tr>
+                        <th>Optical</th>
                         <td>{{number_format($optical_amount,2)}}</td>
                     </tr>
+                    @endif
                 </table>
             </div>
+        </div>
+        <hr>
+
+        <div class="col-md-12 col-sm-12 col-lg-12">
             <div class="col-md-6 col-sm-12 col-lg-6">
                 <hr/>
                 <h4>Total</h4>
                 <table class="table table-striped">
                     <tr>
                         <th>Cash | Credit Card | Mpesa | Cheque</th>
-                        <th>Insurance</th>
+                        <td>{{number_format($total,2)}}</td>
                     </tr>
                     <tr>
-                        <td>{{number_format($total,2)}}</td>
+                        <th>Insurance</th>
                         <td>{{number_format($total_i,2)}}</td>
                     </tr>
                     <tr>
@@ -302,6 +345,7 @@ $optical_amount = 0;
                 </table>
             </div>
         </div>
+
         @else
         <div class="alert alert-info">
             <p><i class="fa fa-info-circle"></i> No records found</p>
