@@ -29,7 +29,8 @@ class PatientController extends AdminBaseController
         $this->data['clinician'] = UserProfile::where('job_description', '=', 'Doctor')
             ->orWhere('job_description', '=', 'Nurse')
             ->get();
-        $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')->get();
+        $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')->orderBy('created_at','desc')
+            ->get();
         return view('reports::patients.treatment', ['data' => $this->data]);
     }
 
