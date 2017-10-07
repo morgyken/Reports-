@@ -2,13 +2,15 @@
 
 namespace Ignite\Reports\Http\Controllers;
 
+use Carbon\Carbon;
 use Ignite\Core\Http\Controllers\AdminBaseController;
 use Ignite\Evaluation\Entities\DoctorNotes;
 use Ignite\Evaluation\Entities\Investigations;
 use Ignite\Evaluation\Entities\Prescriptions;
 use Ignite\Evaluation\Entities\Visit;
-Use Ignite\Settings\Entities\Clinics;
-use Ignite\Users\Entities\UserProfile;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Jenssegers\Date\Date;
 
 class PatientController extends AdminBaseController
 {
@@ -23,14 +25,44 @@ class PatientController extends AdminBaseController
         return view('reports::patients.procedures', ['data' => $this->data]);
     }
 
-    public function treatment()
+    public function treatment(Request $request)
     {
-        $this->data['clinics'] = Clinics::all();
-        $this->data['clinician'] = UserProfile::where('job_description', '=', 'Doctor')
-            ->orWhere('job_description', '=', 'Nurse')
+        $this->data['filter'] = null;
+        $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')->orderBy('created_at', 'desc')
             ->get();
-        $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')->orderBy('created_at','desc')
-            ->get();
+        if ($request->isMethod('post')) {
+            $diagnoses = DoctorNotes::query();
+
+            if (($request->has('end') && $request->has('start')) && ($request->end == $request->start)) {
+                $diagnoses->where('created_at', '<=', $request->end);
+                $this->data['filter']['to'] = (new Date($request->end))->format('jS M Y');
+            } else {
+                if ($request->has('start')) {
+                    $diagnoses->where('created_at', '>=', $request->start);
+                    $this->data['filter']['from'] = (new Date($request->start))->format('jS M Y');
+                }
+                if ($request->has('end')) {
+                    $diagnoses->where('created_at', '<=', $request->end);
+                    $this->data['filter']['to'] = (new Date($request->end))->format('jS M Y');
+                }
+            }
+            if ($request->has('uo')) {
+
+                if ($request->uo == 'u') {
+                    $diagnoses->whereHas('visits.patients', function (Builder $builder) {
+                        $date = Carbon::now();
+                        $builder->where('dob', '>', $date->subYears(5)->toDateString());
+                    });
+
+                } else if ($request->uo == 'o') {
+                    $diagnoses->whereHas('visits.patients', function (Builder $builder) {
+                        $date = Carbon::now();
+                        $builder->where('dob', '<', $date->subYears(5)->toDateString());
+                    });
+                }
+            }
+            $this->data['diagnoses'] = $diagnoses->whereNotNull('diagnosis')->get();
+        }
         return view('reports::patients.treatment', ['data' => $this->data]);
     }
 

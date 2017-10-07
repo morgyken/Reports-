@@ -5,6 +5,8 @@
  * Author: Samuel Okoth <sodhiambo@collabmed.com>
  */
 extract($data);
+$start = Illuminate\Support\Facades\Input::get('start');
+$end = Illuminate\Support\Facades\Input::get('end');
 ?>
 @extends('layouts.app')
 @section('content_title','Performed Diagnoses')
@@ -13,6 +15,25 @@ extract($data);
 @section('content')
     <div class="box box-info">
         <div class="box-body">
+            <div class="box-header">
+                <div class="col-md-12">
+                    {!! Form::open()!!}
+                    Start Date:
+                    <input type="text" id="date1" name="start" value="{{$start}}"/>
+                    End Date:
+                    <input type="text" id="date2" name="end" value="{{$end}}"/>
+                    U/O{{Form::select('uo',['o'=>'Over 5','u'=>'Under 5'],null,['placeholder'=>'Select'])}}
+                    <button type="submit" id="clearBtn" class="btn btn-primary btn-xs">
+                        <i class="fa fa-filter"></i> Filter
+                    </button>
+                    <a class="btn btn-xs btn-primary" href="">View all records</a>
+                    {!! Form::close()!!}
+                </div>
+            </div>
+            <div class="alert alert-success">
+                <i class="fa fa-info-circle"></i>
+                {{filter_description($data['filter'])}}
+            </div>
             <table class="table table-striped">
                 <tbody id="result">
                 @foreach($diagnoses as $item)
@@ -58,27 +79,17 @@ extract($data);
         </div>
     </div>
     <script type="text/javascript">
-        $('#clinician').change(function () {
-            FetchDiagnoses('clinician', this.value);
-        });
-
-        function FetchDiagnoses(type, value) {
-            $(document).ready(function () {
-                $.ajax({
-                    type: 'get',
-                    url: "{{route('api.reports.diagnoses.clinic')}}",
-                    data: {'type': type, 'value': value},
-                    dataType: 'html',
-                    success: function (response) {
-                        $('#result').html(response);
-                    }
-                });
+        $(document).ready(function () {
+            $("#date1").datepicker({
+                dateFormat: 'yy-mm-dd', onSelect: function (date) {
+                    $("#date2").datepicker('option', 'minDate', date);
+                }
             });
-        }
+            $("#date2").datepicker({dateFormat: 'yy-mm-dd'});
 
-        $(function () {
+            $("#date").datepicker({dateFormat: 'yy-mm-dd'});
+
             $('table').DataTable({
-                pageLength: 50,
                 dom: 'Bfrtip',
                 buttons: [
                     'excel', 'pdf', 'print'

@@ -23,7 +23,8 @@ use Maatwebsite\Sidebar\SidebarExtender as Panda;
  *
  * @author Samuel Dervis <samueldervis@gmail.com>
  */
-class SidebarExtender implements Panda {
+class SidebarExtender implements Panda
+{
 
     /**
      * @var Authentication
@@ -34,11 +35,13 @@ class SidebarExtender implements Panda {
      * @param Authentication $auth
      *
      */
-    public function __construct(Authentication $auth) {
+    public function __construct(Authentication $auth)
+    {
         $this->auth = $auth;
     }
 
-    public function extendWith(Menu $menu) {
+    public function extendWith(Menu $menu)
+    {
         $menu->group('Dashboard', function (Group $group) {
             $group->item('Reports', function (Item $item) {
                 $item->weight(100);
@@ -100,6 +103,11 @@ class SidebarExtender implements Panda {
                     $item->item('Doctor Summary', function (Item $item) {
                         $item->icon('fa fa-user-md');
                         $item->route('reports.finance.doctor');
+                        $item->authorize($this->auth->hasAccess('reports.financial'));
+                    });
+                    $item->item('Sales Report', function (Item $item) {
+                        $item->icon('fa fa-btc');
+                        $item->route('reports.finance.sales');
                         $item->authorize($this->auth->hasAccess('reports.financial'));
                     });
 
