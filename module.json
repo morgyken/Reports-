@@ -1,18 +1,29 @@
 {
-    "name": "Reports",
-    "alias": "reports",
-    "description": "",
-    "keywords": [],
-    "active": 1,
-    "order": 0,
-    "providers": [
-        "Ignite\\Reports\\Providers\\ReportsServiceProvider",
-        "Ignite\\Reports\\Providers\\RouteServiceProvider",
-        "Khill\\Lavacharts\\Laravel\\LavachartsServiceProvider"
-    ],
-    "aliases": {},
-    "files": [
-        "start.php", "helpers.php"
-    ],
-    "requires": []
+  "name": "Reports",
+  "alias": "reports",
+  "description": "Main reporting module",
+  "keywords": [],
+  "active": 1,
+  "order": 0,
+  "providers": [
+    "Ignite\\Reports\\Providers\\ReportsServiceProvider",
+    "Ignite\\Reports\\Providers\\RouteServiceProvider",
+    "Khill\\Lavacharts\\Laravel\\LavachartsServiceProvider"
+  ],
+  "aliases": {},
+  "files": [
+    "start.php",
+    "helpers.php"
+  ],
+  "requires": [],
+  "author": [
+    {
+      "name": "Kiptoo Bravo",
+      "email": "bkiptoo@collabmed.com"
+    },
+    {
+      "name": "Samuel Okoth",
+      "email": "sodhiambo@collabmed.com"
+    }
+  ]
 }
