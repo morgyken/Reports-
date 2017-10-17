@@ -34,7 +34,7 @@ extract($data);
                     <?php
                 } catch (\Exception $ex) {
                     //Fuck that error
-                    dd($procedure);
+//                    dd($procedure->visits);
                 }
                 ?>
                 @endforeach
