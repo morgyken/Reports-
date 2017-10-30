@@ -12,7 +12,6 @@
   ],
   "aliases": {},
   "files": [
-    "start.php",
     "helpers.php"
   ],
   "requires": [],
