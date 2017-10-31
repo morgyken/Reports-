@@ -29,4 +29,8 @@ Route::group(['middleware' => 'web', 'prefix' => 'reports', 'as' => 'reports.', 
     Route::match(['post', 'get'], 'stocks', ['uses' => 'InventoryController@stocks', 'as' => 'inventory.stocks']);
     Route::match(['post', 'get'], 'stock/movement', ['uses' => 'InventoryController@stockMovement', 'as' => 'inventory.stocks.movement']);
     Route::match(['post', 'get'], 'stock/expiry', ['uses' => 'InventoryController@expiry', 'as' => 'inventory.stocks.expiry']);
+
+    Route::match(['post', 'get'], 'lab', ['uses' => 'LabController@index', 'as' => 'labs']);
+
+    Route::get('lab/create', ['uses' => 'LabController@create', 'as' => 'labs.create']);
 });
