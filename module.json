@@ -8,9 +8,12 @@
   "providers": [
     "Ignite\\Reports\\Providers\\ReportsServiceProvider",
     "Ignite\\Reports\\Providers\\RouteServiceProvider",
-    "Khill\\Lavacharts\\Laravel\\LavachartsServiceProvider"
+    "Khill\\Lavacharts\\Laravel\\LavachartsServiceProvider",
+    "Maatwebsite\\Excel\\ExcelServiceProvider"
   ],
-  "aliases": {},
+  "aliases": {
+    "Excel": "Maatwebsite\\Excel\\Facades\\Excel"
+  },
   "files": [
     "helpers.php"
   ],
