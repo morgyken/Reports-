@@ -69,6 +69,10 @@ class SidebarExtender implements Panda
                         $item->icon('fa fa-meetup');
                         $item->route('reports.patients.visits');
                     });
+                    $item->item('Lab Procedures', function (Item $item) {
+                        $item->icon('fa fa-filter');
+                        $item->route('reports.labs');
+                    });
                 });
                 $item->item('Inventory analytics', function (Item $item) {
                     $item->icon('fa fa-shopping-bag');

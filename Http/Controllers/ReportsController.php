@@ -5,6 +5,7 @@ namespace Ignite\Reports\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Ignite\Evaluation\Entities\Investigations;
 
 class ReportsController extends Controller
 {
@@ -68,5 +69,36 @@ class ReportsController extends Controller
      */
     public function destroy()
     {
+    }
+
+
+    /*
+    * Generates the reports based on the type of report
+    */
+    public function generate()
+    {
+        dd("here");
+
+        // $investigations = Investigations::with(['procedures'])->get();
+
+        // Excel::create('Filename', function($excel) use($investigations) {
+
+        //     $excel->sheet('Sheetname', function($sheet) use($investigations) {
+
+        //         $sheet->freezeFirstRow();
+
+        //         $sheet->row(1, [
+        //             'procedure', 'quantity'
+        //         ]);
+
+        //         $investigations->each(function( $investigation ){
+        //             $sheet->appendRow(2, array(
+        //                 'appended', 'appended'
+        //             ));
+        //         });
+
+        //     });
+
+        // })->export('xls');
     }
 }

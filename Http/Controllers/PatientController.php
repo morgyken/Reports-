@@ -14,7 +14,6 @@ use Jenssegers\Date\Date;
 
 class PatientController extends AdminBaseController
 {
-
     /**
      * Filter procedures
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View

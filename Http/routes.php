@@ -32,4 +32,5 @@ $router->match(['post', 'get'], 'product/sales/report', ['uses' => 'InventoryCon
 $router->match(['post', 'get'], 'stocks', ['uses' => 'InventoryController@stocks', 'as' => 'inventory.stocks']);
 $router->match(['post', 'get'], 'stock/movement', ['uses' => 'InventoryController@stockMovement', 'as' => 'inventory.stocks.movement']);
 $router->match(['post', 'get'], 'stock/expiry', ['uses' => 'InventoryController@expiry', 'as' => 'inventory.stocks.expiry']);
-
+$router->match(['post', 'get'], 'lab', ['uses' => 'LabController@index', 'as' => 'labs']);
+$router->get('lab/create', ['uses' => 'LabController@create', 'as' => 'labs.create']);
