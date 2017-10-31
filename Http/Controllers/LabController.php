@@ -13,7 +13,7 @@ class LabController extends AdminBaseController
     protected $labRepository;
 
     /*
-    * Inject the dependancies into the class
+    * Inject the dependencies into the class
     */
     public function __construct(LabRepository $labRepository)
     {
@@ -22,9 +22,8 @@ class LabController extends AdminBaseController
         $this->labRepository = $labRepository;
     }
 
-    /**
+    /*
      * Display a listing of the resource.
-     * @return Response
      */
     public function index()
     {
@@ -32,10 +31,12 @@ class LabController extends AdminBaseController
             request()->get('filters')
         );
 
+        $grouped = $this->labRepository->getTotalGrouped($investigations);
+
         $dateFilters = $this->labRepository->getDateFilters();
 
         return view('reports::labs.index', [
-            'investigations' => $investigations, 'dateFilters' => $dateFilters
+            'investigations' => $grouped, 'dateFilters' => $dateFilters
         ]);
     }
 

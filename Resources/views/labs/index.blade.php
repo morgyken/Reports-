@@ -16,9 +16,9 @@
 	                    <button type="submit" id="clearBtn" class="btn btn-primary btn-xs" name="filter">
 	                        <i class="fa fa-filter"></i> Filter
 	                    </button>
-	                    <a href="{{ url('reports/lab/create') }}" target="_blank" class="btn btn-xs btn-success">
+	                    <!-- <a href="{{ url('reports/lab/create') }}" target="_blank" class="btn btn-xs btn-success">
 	                    	<i class="fa fa-file-excel-o"></i> Export Labs
-	                    </a>
+	                    </a> -->
                     {!! Form::close()!!}
                 </div>
             </div>
@@ -27,23 +27,17 @@
 	        	<thead>
 	                <tr>
 	                    <th>#</th>
-	                    <th>Type</th>
 	                    <th>Procedure</th>
-	                    <th>Price</th>
-	                    <th>Discount</th>
-	                    <th>Total</th>
+	                    <th>Total count</th>
 	                </tr>
 	            </thead>
 
 	            <tbody>
-	                @foreach($investigations as $investigation)
+	                @foreach($investigations as $procedure => $count)
 	                	<tr>
-	                		<td>{{ $investigation->id }}</td>
-	                		<td>{{ $investigation->type }}</td>
-	                		<td>{{ $investigation->procedures->name }}</td>
-	                		<td>{{ $investigation->price }}</td>
-	                		<td>{{ $investigation->discount }}</td>
-	                		<td>{{ $investigation->amount }}</td>
+	                		<td></td>
+	                		<td>{{ $procedure }}</td>
+	                		<td>{{ $count }}</td>
 	                	</tr>
 	                @endforeach
 	            </tbody>
