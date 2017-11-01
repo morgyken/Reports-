@@ -18,14 +18,15 @@
     "helpers.php"
   ],
   "requires": [],
+  "version": "v1.2.0",
   "author": [
     {
-      "name": "Kiptoo Bravo",
-      "email": "bkiptoo@collabmed.com"
+      "name": "Samuel Dervis",
+      "email": "sodhiambo@collabmed.com"
     },
     {
-      "name": "Samuel Okoth",
-      "email": "sodhiambo@collabmed.com"
+      "name": "Bravo Kiptoo",
+      "email": "bkipto@collabmed.com"
     }
   ]
 }
