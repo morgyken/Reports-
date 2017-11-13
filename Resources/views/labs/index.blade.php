@@ -16,9 +16,6 @@
 	                    <button type="submit" id="clearBtn" class="btn btn-primary btn-xs" name="filter">
 	                        <i class="fa fa-filter"></i> Filter
 	                    </button>
-	                    <!-- <a href="{{ url('reports/lab/create') }}" target="_blank" class="btn btn-xs btn-success">
-	                    	<i class="fa fa-file-excel-o"></i> Export Labs
-	                    </a> -->
                     {!! Form::close()!!}
                 </div>
             </div>
