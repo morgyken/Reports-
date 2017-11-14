@@ -23,7 +23,7 @@ class LabRepository
 	*/
 	public function all()
 	{
-		return Investigations::with(['procedures'])->get();
+		return Investigations::with(['procedures', 'visits'])->get();
 	}	
 
 	/*
@@ -31,26 +31,25 @@ class LabRepository
 	*/
 	public function getFilteredByDate($dateFilters)
 	{
-		$start = $dateFilters['start'];
-		$end = $dateFilters['end'];
+		$start = trim($dateFilters['start']);
+		$end = trim($dateFilters['end']);
+		$relations = ['procedures', 'visits.patients'];
 
-		if(!is_null($start) and !is_null($end))
+		if(!empty($start) and !empty($end))
 		{
-			$range = array_values($dateFilters);
-
-			return Investigations::with(['procedures'])
-								 ->whereBetween($this->column, $range)->get();
+			return Investigations::with($relations)
+								 ->whereBetween($this->column, array_values($dateFilters))->get();
 		}
 
-		if(is_null($start) and !is_null($end))
+		if(empty($start) and !empty($end))
 		{
-			return Investigations::with(['procedures'])
+			return Investigations::with($relations)
 								 ->where($this->column, '<=', $dateFilters['end'])->get();
 		}
 
-		if(!is_null($start) and is_null($end))
+		if(!empty($start) and empty($end))
 		{
-			return Investigations::with(['procedures'])
+			return Investigations::with($relations)
 								 ->where($this->column, '>=', $dateFilters['start'])->get();
 		}
 
@@ -62,10 +61,32 @@ class LabRepository
 	*/
 	public function getFilteredInvestigations($requestFilters)
 	{
-		$dateFilters = $this->getDates($requestFilters);
+		$dateFilters = $requestFilters['date'];
 
-		return $this->getFilteredByDate($dateFilters);
+		$dateFilters = $this->getDates($dateFilters);
+
+		$filteredByDate = $this->getFilteredByDate($dateFilters);
+
+		return $this->getFilteredByAge($filteredByDate, $requestFilters['age']);
 	}
+
+	/*
+	* Filters a collection by a certain age
+	*/
+	public function getFilteredByAge($collection, $filter)
+	{
+		if($filter != 'all')
+		{
+			$collection = $collection->filter(function($item) use($filter){
+
+				$patientAge = $item->visits->patients->age;
+
+				return ($filter == '5') ? $patientAge <= 5 : $patientAge > 5;
+			});
+		}
+
+		return $collection;
+	} 
 
 	/*
 	* Group the investigations by a certain column

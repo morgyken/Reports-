@@ -26,17 +26,20 @@ class LabController extends AdminBaseController
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $investigations = $this->labRepository->getFilteredInvestigations(
-            request()->get('filters')
-        );
+    {   
+        $filters = request()->get('filters');
+
+        $ageFilters = isset($filters['age']) ? $filters['age'] : 'all';
+
+        $investigations = $this->labRepository->getFilteredInvestigations($filters);
 
         $grouped = $this->labRepository->getTotalGrouped($investigations);
 
         $dateFilters = $this->labRepository->getDateFilters();
 
         return view('reports::labs.index', [
-            'investigations' => $grouped, 'dateFilters' => $dateFilters
+            'investigations' => $grouped, 'dateFilters' => $dateFilters,
+            'ageFilters' => $ageFilters,
         ]);
     }
 
