@@ -7,19 +7,25 @@
     <div class="box box-info">
         <div class="box-body">
             <div class="box-header">
-                <div class="col-md-12">
-                    {!! Form::open()!!}
-	                    Start Date:
-	                    <input type="text" id="start" name="filters[start]" value="{{ $dateFilters['start'] }}" />
-	                    End Date:
-	                    <input type="text" id="end" name="filters[end]" value="{{ $dateFilters['end'] }}" />
-	                    <button type="submit" id="clearBtn" class="btn btn-primary btn-xs" name="filter">
-	                        <i class="fa fa-filter"></i> Filter
-	                    </button>
-	                    <!-- <a href="{{ url('reports/lab/create') }}" target="_blank" class="btn btn-xs btn-success">
-	                    	<i class="fa fa-file-excel-o"></i> Export Labs
-	                    </a> -->
-                    {!! Form::close()!!}
+                <div class="row">
+                    <div class="col-md-12">
+                        {!! Form::open(['class'=>'form-inline'])!!}
+                            <label>Start Date:</label>
+                            <input type="text" id="start" name="filters[date][start]" class="form-control" value="{{ $dateFilters['start'] }}" />
+                            <label>End Date:</label>
+                            <input type="text" id="end" name="filters[date][end]" class="form-control" value="{{ $dateFilters['end'] }}" />
+                            <label>Age:</label>
+
+                            <select name="filters[age]" class="form-control">
+                                <option {{ $ageFilters == 'all' ? 'selected' : '' }} value="all">All</option>
+                                <option {{ $ageFilters == 5 ? 'selected' : '' }} value="5">5 years &amp; under</option>
+                                <option {{ $ageFilters == 6 ? 'selected' : '' }} value="6">Over 5 years</option>
+                            </select> 
+                            <button type="submit" id="clearBtn" class="btn btn-primary btn-sm" name="filter">
+                                <i class="fa fa-filter"></i> Apply Filters 
+                            </button>
+                        {!! Form::close()!!}
+                    </div>
                 </div>
             </div>
 
