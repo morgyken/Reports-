@@ -65,6 +65,56 @@ class PatientController extends AdminBaseController
         return view('reports::patients.treatment', ['data' => $this->data]);
     }
 
+    public function hpd(Request $request)
+    {
+        $this->data['filter'] = null;
+        $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')
+            ->whereBetween('created_at', [Carbon::now()->subMonth()->startOfMonth()->toDateTimeString(), Carbon::now()->subMonth()->endOfMonth()])
+            ->orderBy('created_at', 'asc')
+            ->where(function (Builder $query) {
+                $query->orWhere('diagnosis', 'like', '%htn%');
+                $query->orWhere('diagnosis', 'like', '%dm%');
+                $query->orWhere('diagnosis', 'like', '%hypertension%');
+                $query->orWhere('diagnosis', 'like', '%diabetes%');
+            })
+            ->get();
+
+        if ($request->isMethod('post')) {
+            $diagnoses = DoctorNotes::query();
+
+            if (($request->has('end') && $request->has('start')) && ($request->end == $request->start)) {
+                $diagnoses->where('created_at', '<=', $request->end);
+                $this->data['filter']['to'] = (new Date($request->end))->format('jS M Y');
+            } else {
+                if ($request->has('start')) {
+                    $diagnoses->where('created_at', '>=', $request->start);
+                    $this->data['filter']['from'] = (new Date($request->start))->format('jS M Y');
+                }
+                if ($request->has('end')) {
+                    $diagnoses->where('created_at', '<=', $request->end);
+                    $this->data['filter']['to'] = (new Date($request->end))->format('jS M Y');
+                }
+            }
+            if ($request->has('uo')) {
+
+                if ($request->uo == 'u') {
+                    $diagnoses->whereHas('visits.patients', function (Builder $builder) {
+                        $date = Carbon::now();
+                        $builder->where('dob', '>', $date->subYears(5)->toDateString());
+                    });
+
+                } else if ($request->uo == 'o') {
+                    $diagnoses->whereHas('visits.patients', function (Builder $builder) {
+                        $date = Carbon::now();
+                        $builder->where('dob', '<', $date->subYears(5)->toDateString());
+                    });
+                }
+            }
+            $this->data['diagnoses'] = $diagnoses->whereNotNull('diagnosis')->get();
+        }
+        return view('reports::patients.hpd', ['data' => $this->data]);
+    }
+
     public function medication()
     {
         $this->data['medication'] = Prescriptions::all();
