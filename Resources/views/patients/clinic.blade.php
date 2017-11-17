@@ -9,8 +9,8 @@ $start = Illuminate\Support\Facades\Input::get('start');
 $end = Illuminate\Support\Facades\Input::get('end');
 ?>
 @extends('layouts.app')
-@section('content_title','Performed Diagnoses')
-@section('content_description','Analytics for patient treatement')
+@section('content_title','Clinic Report')
+@section('content_description',$clinic.' report')
 
 @section('content')
     <div class="box box-info">
@@ -22,7 +22,6 @@ $end = Illuminate\Support\Facades\Input::get('end');
                     <input type="text" id="date1" name="start" value="{{$start}}"/>
                     End Date:
                     <input type="text" id="date2" name="end" value="{{$end}}"/>
-                    U/O{{Form::select('uo',['o'=>'Over 5','u'=>'Under 5'],null,['placeholder'=>'Select'])}}
                     <button type="submit" id="clearBtn" class="btn btn-primary btn-xs">
                         <i class="fa fa-filter"></i> Filter
                     </button>

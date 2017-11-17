@@ -56,7 +56,26 @@ class SidebarExtender implements Panda
                         $item->icon('fa fa-life-ring');
                         $item->route('reports.patients.procedures');
                     });
-
+                    $clinics = [
+                        ['name' => 'hpd', 'icon' => 'fa-stethoscope',],
+                        ['name' => 'popc', 'icon' => 'fa-openid', 'show' => 'Pedeatrics'],
+                        ['name' => 'orthopeadic', 'icon' => 'fa-magnet', 'show' => 'Orthopeadic'],
+                        ['name' => 'mopc', 'icon' => 'fa-magic', 'show' => 'Medical'],
+                        ['name' => 'sopc', 'icon' => 'fa-paw', 'show' => 'Surgical'],
+                        ['name' => 'gopc', 'icon' => 'fa-sun-o', 'show' => 'Gyenecology'],
+                        ['name' => 'physio', 'icon' => 'fa-tint', 'show' => 'Physiotherapy'],
+                    ];
+                    foreach ($clinics as $clinic) {
+                        $clinic = (object)$clinic;
+                        if (m_setting('evaluation.with_clinic_' . $clinic->name)) {
+                            $name = $clinic->show ?? strtoupper($clinic->name);
+                            $item->item($name . ' Reports', function (Item $item) use ($clinic) {
+                                $item->icon('fa ' . $clinic->icon);
+                                $item->route('reports.patients.clinic', $clinic->name);
+                                $item->authorize($this->auth->hasAccess('reports.clinics'));
+                            });
+                        }
+                    }
                     $item->item('Patient Diagnoses', function (Item $item) {
                         $item->icon('fa fa-bath');
                         $item->route('reports.patients.treatment');

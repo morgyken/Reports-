@@ -41,7 +41,8 @@ class PatientController extends AdminBaseController
                     $this->data['filter']['from'] = (new Date($request->start))->format('jS M Y');
                 }
                 if ($request->has('end')) {
-                    $diagnoses->where('created_at', '<=', $request->end);
+                    $date = Carbon::parse($request->end)->endOfDay()->toDateTimeString();
+                    $diagnoses->where('created_at', '<=', $date);
                     $this->data['filter']['to'] = (new Date($request->end))->format('jS M Y');
                 }
             }
@@ -65,20 +66,21 @@ class PatientController extends AdminBaseController
         return view('reports::patients.treatment', ['data' => $this->data]);
     }
 
-    public function hpd(Request $request)
+    public function clinic(Request $request, $clinic)
     {
-        $this->data['filter'] = null;
-        $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')
-            ->whereBetween('created_at', [Carbon::now()->subMonth()->startOfMonth()->toDateTimeString(), Carbon::now()->subMonth()->endOfMonth()])
-            ->orderBy('created_at', 'asc')
-            ->where(function (Builder $query) {
-                $query->orWhere('diagnosis', 'like', '%htn%');
-                $query->orWhere('diagnosis', 'like', '%dm%');
-                $query->orWhere('diagnosis', 'like', '%hypertension%');
-                $query->orWhere('diagnosis', 'like', '%diabetes%');
-            })
-            ->get();
 
+        $_c = [
+            'mch' => 'MCH',
+            'hpd' => 'Hypertension and Diabetes',
+            'orthopeadic' => 'Orthopeadic',
+            'popc' => 'Pedeatrics',
+            'mopc' => 'Medical',
+            'sopc' => 'Sergical',
+            'gopc' => 'Gyenecology',
+            'physio' => 'Physiotherapy',
+        ];
+        $this->data['clinic'] = $_c[$clinic];
+        $this->data['filter'] = null;
         if ($request->isMethod('post')) {
             $diagnoses = DoctorNotes::query();
 
@@ -91,26 +93,19 @@ class PatientController extends AdminBaseController
                     $this->data['filter']['from'] = (new Date($request->start))->format('jS M Y');
                 }
                 if ($request->has('end')) {
-                    $diagnoses->where('created_at', '<=', $request->end);
+                    $date = Carbon::parse($request->end)->endOfDay()->toDateTimeString();
+                    $diagnoses->where('created_at', '<=', $date);
                     $this->data['filter']['to'] = (new Date($request->end))->format('jS M Y');
                 }
             }
-            if ($request->has('uo')) {
-
-                if ($request->uo == 'u') {
-                    $diagnoses->whereHas('visits.patients', function (Builder $builder) {
-                        $date = Carbon::now();
-                        $builder->where('dob', '>', $date->subYears(5)->toDateString());
-                    });
-
-                } else if ($request->uo == 'o') {
-                    $diagnoses->whereHas('visits.patients', function (Builder $builder) {
-                        $date = Carbon::now();
-                        $builder->where('dob', '<', $date->subYears(5)->toDateString());
-                    });
-                }
-            }
             $this->data['diagnoses'] = $diagnoses->whereNotNull('diagnosis')->get();
+        } else {
+            $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')
+                ->orderBy('created_at', 'asc')
+                ->whereHas('visits.destinations', function (Builder $query) use ($clinic) {
+                    $query->where('destination', $clinic);
+                })
+                ->get();
         }
         return view('reports::patients.clinic', ['data' => $this->data]);
     }
