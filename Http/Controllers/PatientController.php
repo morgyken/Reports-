@@ -112,7 +112,7 @@ class PatientController extends AdminBaseController
             }
             $this->data['diagnoses'] = $diagnoses->whereNotNull('diagnosis')->get();
         }
-        return view('reports::patients.hpd', ['data' => $this->data]);
+        return view('reports::patients.clinic', ['data' => $this->data]);
     }
 
     public function medication()
