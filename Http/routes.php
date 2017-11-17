@@ -8,6 +8,7 @@ $router->get('/', 'ReportsController@index');
 
 $router->get('procedures/performed', ['uses' => 'PatientController@procedures', 'as' => 'patients.procedures']);
 $router->any('procedures/treatment', ['uses' => 'PatientController@treatment', 'as' => 'patients.treatment']);
+$router->any('procedures/clinic/{clinic}/reports', ['uses' => 'PatientController@clinic', 'as' => 'patients.clinic']);
 $router->get('medication/given', ['uses' => 'PatientController@medication', 'as' => 'patients.medication']);
 $router->get('patient/visits', ['uses' => 'PatientController@visits', 'as' => 'patients.visits']);
 
