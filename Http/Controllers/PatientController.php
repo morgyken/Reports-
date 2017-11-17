@@ -103,7 +103,7 @@ class PatientController extends AdminBaseController
             $this->data['diagnoses'] = DoctorNotes::whereNotNull('diagnosis')
                 ->orderBy('created_at', 'asc')
                 ->whereHas('visits.destinations', function (Builder $query) use ($clinic) {
-                    $query->where('destination', $clinic);
+                    $query->where('department', ucfirst($clinic));
                 })
                 ->get();
         }
