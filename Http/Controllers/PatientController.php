@@ -8,6 +8,7 @@ use Ignite\Evaluation\Entities\DoctorNotes;
 use Ignite\Evaluation\Entities\Investigations;
 use Ignite\Evaluation\Entities\Prescriptions;
 use Ignite\Evaluation\Entities\Visit;
+use Ignite\Reception\Entities\Patients;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Jenssegers\Date\Date;
@@ -121,6 +122,13 @@ class PatientController extends AdminBaseController
         $this->data['visits'] = Visit::all();
         //Charts::visitCharts($this->data['visits']);
         return view('reports::patients.visits', ['data' => $this->data]);
+    }
+
+    public function contacts()
+    {
+        $this->data['patients'] = Patients::all();
+        //Charts::visitCharts($this->data['visits']);
+        return view('reports::patients.patients', ['data' => $this->data]);
     }
 
 }
