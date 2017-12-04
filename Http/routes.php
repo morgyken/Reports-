@@ -84,7 +84,7 @@ $router->get('/hyper-tension', function(){
 
             'residence' => $patient->town,
 
-            'visit_type' => '',
+            'visit_type' => getVisitType($visit),
 
             'bp_systolic' => $visit->vitals ? $visit->vitals->bp_systolic : '',
 
@@ -96,8 +96,7 @@ $router->get('/hyper-tension', function(){
 
             'treatment' => $prescriptions
         ];
-
-
+        
     })->toArray();
 
     generateLabsReport($visits);
@@ -123,6 +122,15 @@ function getPrescriptions($prescriptions)
     });
 
     return trim($data, ', ');
+}
+
+function getVisitType($visit)
+{
+    $patient = $visit->patients;
+
+    $visits = \Ignite\Evaluation\Entities\Visit::where('patient', $patient->id)->count();
+
+    return $visits == 1 ? "New" : "Existing";
 }
 
 /*
