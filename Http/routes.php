@@ -42,9 +42,9 @@ $router->match(['post', 'get'], 'client/doctors', ['uses' => 'ClientDoctorsContr
 
 $router->get('/hyper-tension', function(){
     
-    $rangeStart = Carbon::createFromDate(2017, 11, 1);
+    $rangeStart = \Carbon\Carbon::createFromDate(2017, 11, 1);
 
-    $rangeEnd = Carbon::createFromDate(2017, 11, 30);
+    $rangeEnd = \Carbon\Carbon::createFromDate(2017, 11, 30);
 
     $visits = \Ignite\Evaluation\Entities\Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])->get();
 
