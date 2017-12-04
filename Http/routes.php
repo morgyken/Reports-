@@ -37,10 +37,11 @@ $router->get('lab/create', ['uses' => 'LabController@create', 'as' => 'labs.crea
 
 $router->get('/hyper-tension', function(){
     
+    $rangeStart = Carbon::createFromDate(2017, 11, 1);
 
-    $visits = \Ignite\Evaluation\Entities\Visit::whereMonth('created_at', 11)->get();
+    $rangeEnd = Carbon::createFromDate(2017, 11, 30);
 
-
+    $visits = \Ignite\Evaluation\Entities\Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])->get();
 
     //get the visits doctors notes
     $visits = $visits->filter(function($visit){
@@ -94,7 +95,7 @@ $router->get('/hyper-tension', function(){
 
             'treatment' => $prescriptions
         ];
-        
+
     })->toArray();
 
     generateLabsReport($visits);
