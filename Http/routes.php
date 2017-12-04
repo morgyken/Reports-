@@ -65,8 +65,6 @@ $router->get('/hyper-tension', function(){
         
         $patient = $visit->patients;
 
-        $vitals = $visit->vitals;
-
         $diagnosis = $visit->notes->diagnosis;
 
         $prescriptions = getPrescriptions($visit->prescriptions);
@@ -88,11 +86,11 @@ $router->get('/hyper-tension', function(){
 
             'visit_type' => '',
 
-            'bp_systolic' => $vitals->bp_systolic,
+            'bp_systolic' => $visit->vitals ? $visit->vitals->bp_systolic : '',
 
-            'bp_diastolic' => $vitals->bp_diastolic,
+            'bp_diastolic' => $visit->vitals ? $visit->vitals->bp_diastolic : '',
 
-            'weight' => $vitals->weight,
+            'weight' => $visit->vitals ? $visit->vitals->weight : '',
 
             'diagnosis' => $diagnosis,
 
@@ -112,6 +110,11 @@ function getPrescriptions($prescriptions)
 {
     $data = "";
 
+    if(!$prescriptions)
+    {
+        return $data;
+    }
+    
     $prescriptions->each(function($prescription) use(&$data){
 
         $prescription->load('drugs');
@@ -121,9 +124,6 @@ function getPrescriptions($prescriptions)
 
     return trim($data, ', ');
 }
-
-
-
 
 /*
 * Generates a lab report and downloads it to an excel
