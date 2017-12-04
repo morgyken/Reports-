@@ -34,3 +34,130 @@ $router->match(['post', 'get'], 'stock/movement', ['uses' => 'InventoryControlle
 $router->match(['post', 'get'], 'stock/expiry', ['uses' => 'InventoryController@expiry', 'as' => 'inventory.stocks.expiry']);
 $router->match(['post', 'get'], 'lab', ['uses' => 'LabController@index', 'as' => 'labs']);
 $router->get('lab/create', ['uses' => 'LabController@create', 'as' => 'labs.create']);
+
+$router->get('/hyper-tension', function(){
+    
+
+    $visits = \Ignite\Evaluation\Entities\Visit::whereMonth('created_at', 11)->get();
+
+
+
+    //get the visits doctors notes
+    $visits = $visits->filter(function($visit){
+
+        //get the patients diagnosis
+        $search = ['htn', 'hypertension', 'dm', 'diabetes'];
+
+        if($visit->notes)
+        {
+            $diagnosis = $visit->notes->diagnosis;
+            
+            foreach($search as $item)
+            {
+                return (strpos($diagnosis, $item) !== false);
+            }
+        }
+    });
+
+    $visits = $visits->transform(function($visit){
+        
+        $patient = $visit->patients;
+
+        $vitals = $visit->vitals;
+
+        $diagnosis = $visit->notes->diagnosis;
+
+        $prescriptions = getPrescriptions($visit->prescriptions);
+
+        return [
+            'visit_date' => \Carbon\Carbon::parse($visit->created_at)->toDateTimeString(),
+
+            'patient_id' => $patient->patient_no,
+
+            'patient_name' => $patient->fullName,
+
+            'phone_number' => $patient->mobile,
+
+            'age' => $patient->age,
+
+            'gender' => $patient->sex,
+
+            'residence' => $patient->town,
+
+            'visit_type' => '',
+
+            'bp_systolic' => $vitals->bp_systolic,
+
+            'bp_diastolic' => $vitals->bp_diastolic,
+
+            'weight' => $vitals->weight,
+
+            'diagnosis' => $diagnosis,
+
+            'treatment' => $prescriptions
+        ];
+
+
+    })->toArray();
+
+    generateLabsReport($visits);
+
+    dd("done");
+});
+
+
+function getPrescriptions($prescriptions)
+{
+    $data = "";
+
+    $prescriptions->each(function($prescription) use(&$data){
+
+        $prescription->load('drugs');
+
+        $data .= $prescription->drugs->name . ", ";
+    });
+
+    return trim($data, ', ');
+}
+
+
+
+
+/*
+* Generates a lab report and downloads it to an excel
+*/
+function generateLabsReport($visits)
+{
+    ob_clean();
+
+    \Excel::create('hypertension_diabetes', function($excel) use($visits){
+
+        $excel->sheet('hypertension_diabetes', function($sheet) use($visits){
+
+            $sheet->row(1, ['Visit date', 'Patient ID', 'Patient Name', 'Phone', 'Age', 'Gender', 'Residence', 'Visit Type', 'Bp Systolic', 'Bp Diastolic', 'Weight', 'Diagnosis', 'Treatment']);
+
+            $sheet->freezeFirstRow();
+
+            foreach($visits as $report)
+            {
+                $sheet->appendRow([
+                    $report['visit_date'],
+                    $report['patient_id'],
+                    $report['patient_name'],
+                    $report['phone_number'],
+                    $report['age'],
+                    $report['gender'],
+                    $report['residence'],
+                    $report['visit_type'],
+                    $report['bp_systolic'],
+                    $report['bp_diastolic'],
+                    $report['weight'],
+                    trim($report['diagnosis']),
+                    $report['treatment'],
+                ]);
+            }
+
+        });
+
+    })->export('xls');
+}
