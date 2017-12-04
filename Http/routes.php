@@ -35,6 +35,11 @@ $router->match(['post', 'get'], 'stock/expiry', ['uses' => 'InventoryController@
 $router->match(['post', 'get'], 'lab', ['uses' => 'LabController@index', 'as' => 'labs']);
 $router->get('lab/create', ['uses' => 'LabController@create', 'as' => 'labs.create']);
 
+$router->match(['post', 'get'], 'client/depatments', ['uses' => 'ClientDepartmentsController@index', 'as' => 'client.departments']);
+
+$router->match(['post', 'get'], 'client/doctors', ['uses' => 'ClientDoctorsController@index', 'as' => 'client.doctors']);
+
+
 $router->get('/hyper-tension', function(){
     
     $rangeStart = Carbon::createFromDate(2017, 11, 1);
@@ -49,14 +54,21 @@ $router->get('/hyper-tension', function(){
         //get the patients diagnosis
         $search = ['htn', 'hypertension', 'dm', 'diabetes'];
 
+        $match = false;
+
         if($visit->notes)
         {
             $diagnosis = $visit->notes->diagnosis;
             
             foreach($search as $item)
             {
-                return (strpos($diagnosis, $item) !== false);
+                if(strpos($diagnosis, $item) !== false)
+                {
+                    $match = true;
+                }
             }
+
+            return $match;
         }
     });
 
