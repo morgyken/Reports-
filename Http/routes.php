@@ -41,142 +41,51 @@ $router->match(['post', 'get'], 'client/depatments', ['uses' => 'ClientDepartmen
 
 $router->match(['post', 'get'], 'client/doctors', ['uses' => 'ClientDoctorsController@index', 'as' => 'client.doctors']);
 
-
-$router->get('/hyper-tension', function(){
-    
-    $rangeStart = \Carbon\Carbon::createFromDate(2017, 11, 1);
-
-    $rangeEnd = \Carbon\Carbon::createFromDate(2017, 11, 30);
-
-    $visits = \Ignite\Evaluation\Entities\Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])->get();
-
-    //get the visits doctors notes
-    $visits = $visits->filter(function($visit){
-
-        //get the patients diagnosis
-        $search = ['htn', 'hypertension', 'dm', 'diabetes'];
-
-        $match = false;
-
-        if($visit->notes)
-        {
-            $diagnosis = $visit->notes->diagnosis;
-            
-            foreach($search as $item)
-            {
-                if(strpos($diagnosis, $item) !== false)
-                {
-                    $match = true;
-                }
-            }
-
-            return $match;
-        }
-    });
-
-    $visits = $visits->transform(function($visit){
-        
-        $patient = $visit->patients;
-
-        $diagnosis = $visit->notes->diagnosis;
-
-        $prescriptions = getPrescriptions($visit->prescriptions);
+/*
+* patients
+*/
+$router->get('/patients', function(){
+    $patients = \Ignite\Reception\Entities\Patients::all()->map(function($patient){
 
         return [
-            'visit_date' => \Carbon\Carbon::parse($visit->created_at)->toDateTimeString(),
+            'first_name' => $patient->first_name,
 
-            'patient_id' => $patient->patient_no,
+            'middle_name' =>  $patient->middle_name,
 
-            'patient_name' => $patient->fullName,
+            'last_name' =>  $patient->last_name,
 
-            'phone_number' => $patient->mobile,
-
-            'age' => $patient->age,
-
-            'gender' => $patient->sex,
-
-            'residence' => $patient->town,
-
-            'visit_type' => getVisitType($visit),
-
-            'bp_systolic' => $visit->vitals ? $visit->vitals->bp_systolic : '',
-
-            'bp_diastolic' => $visit->vitals ? $visit->vitals->bp_diastolic : '',
-
-            'weight' => $visit->vitals ? $visit->vitals->weight : '',
-
-            'diagnosis' => $diagnosis,
-
-            'treatment' => $prescriptions
+            'contacts' => $patient->mobile,
         ];
 
-    })->toArray();
-
-    generateLabsReport($visits);
-
-    dd("done");
-});
-
-
-function getPrescriptions($prescriptions)
-{
-    $data = "";
-
-    if(!$prescriptions)
-    {
-        return $data;
-    }
-    
-    $prescriptions->each(function($prescription) use(&$data){
-
-        $prescription->load('drugs');
-
-        $data .= $prescription->drugs->name . ", ";
     });
+    
+    generatePatientReport($patients);
 
-    return trim($data, ', ');
-}
-
-function getVisitType($visit)
-{
-    $patient = $visit->patients;
-
-    $visits = \Ignite\Evaluation\Entities\Visit::where('patient', $patient->id)->count();
-
-    return $visits == 1 ? "New" : "Existing";
-}
+    dd("Report Downloaded Successfully");
+});
 
 /*
 * Generates a lab report and downloads it to an excel
 */
-function generateLabsReport($visits)
+function generatePatientReport($patients)
 {
     ob_clean();
 
-    \Excel::create('hypertension_diabetes', function($excel) use($visits){
+    \Excel::create('patient_reports', function($excel) use($patients){
 
-        $excel->sheet('hypertension_diabetes', function($sheet) use($visits){
+        $excel->sheet('patients_report', function($sheet) use($patients){
 
-            $sheet->row(1, ['Visit date', 'Patient ID', 'Patient Name', 'Phone', 'Age', 'Gender', 'Residence', 'Visit Type', 'Bp Systolic', 'Bp Diastolic', 'Weight', 'Diagnosis', 'Treatment']);
+            $sheet->row(1, ['First Name', 'Middle Name', 'Last Name', 'Contacts']);
 
             $sheet->freezeFirstRow();
 
-            foreach($visits as $report)
+            foreach($patients as $report)
             {
                 $sheet->appendRow([
-                    $report['visit_date'],
-                    $report['patient_id'],
-                    $report['patient_name'],
-                    $report['phone_number'],
-                    $report['age'],
-                    $report['gender'],
-                    $report['residence'],
-                    $report['visit_type'],
-                    $report['bp_systolic'],
-                    $report['bp_diastolic'],
-                    $report['weight'],
-                    trim($report['diagnosis']),
-                    $report['treatment'],
+                    $report['first_name'],
+                    $report['middle_name'],
+                    $report['last_name'],
+                    $report['contacts'],
                 ]);
             }
 
@@ -184,3 +93,4 @@ function generateLabsReport($visits)
 
     })->export('xls');
 }
+
