@@ -15,6 +15,12 @@
                             <label>End Date:</label>
                             <input type="text" id="end" name="filters[date][end]" class="form-control" value="{{ $dateFilters['end'] }}" />
                             
+                            <!-- <select name="" id="">
+                                @foreach()  
+                                    <option value=""></option>
+                                @endforeach 
+                            </select> -->
+                            
                             <button type="submit" id="clearBtn" class="btn btn-primary btn-sm" name="filter">
                                 <i class="fa fa-filter"></i> Apply Filters 
                             </button>
