@@ -41,187 +41,141 @@ $router->match(['post', 'get'], 'client/depatments', ['uses' => 'ClientDepartmen
 
 $router->match(['post', 'get'], 'client/doctors', ['uses' => 'ClientDoctorsController@index', 'as' => 'client.doctors']);
 
+
+
+
 $router->get('/hyper-tension', function(){
     
-    
-        $visits = \Ignite\Evaluation\Entities\Visit::whereMonth('created_at', 12)->get();
-    
-    
-    
-        //get the visits doctors notes
-        $visits = $visits->filter(function($visit){
-    
-            //get the patients diagnosis
-            $search = ['htn', 'hypertension', 'dm', 'diabetes'];
-    
-            if($visit->notes)
-            {
-                $diagnosis = $visit->notes->diagnosis;
-                
-                foreach($search as $item)
-                {
-                    return (strpos($diagnosis, $item) !== false);
-                }
-            }
-        });
-    
-        $visits = $visits->transform(function($visit){
-            
-            $patient = $visit->patients;
-    
-            $vitals = $visit->vitals;
-    
+    $rangeStart = \Carbon\Carbon::createFromDate(2017, 12, 1);
+
+    $rangeEnd = \Carbon\Carbon::createFromDate(2017, 12, 31);
+
+    $visits = \Ignite\Evaluation\Entities\Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])->get();
+
+    //get the visits doctors notes
+    $visits = $visits->filter(function($visit){
+
+        //get the patients diagnosis
+        $search = ['htn', 'hypertension', 'dm', 'diabetes'];
+
+        if($visit->notes)
+        {
             $diagnosis = $visit->notes->diagnosis;
-    
-            $prescriptions = getPrescriptions($visit->prescriptions);
-    
-            return [
-                'visit_date' => \Carbon\Carbon::parse($visit->created_at)->toDateTimeString(),
-    
-                'patient_id' => $patient->patient_no,
-    
-                'patient_name' => $patient->fullName,
-    
-                'phone_number' => $patient->mobile,
-    
-                'age' => $patient->age,
-    
-                'gender' => $patient->sex,
-    
-                'residence' => $patient->town,
-    
-                'visit_type' => '',
-    
-                'bp_systolic' => $vitals->bp_systolic,
-    
-                'bp_diastolic' => $vitals->bp_diastolic,
-    
-                'weight' => $vitals->weight,
-    
-                'diagnosis' => $diagnosis,
-    
-                'treatment' => $prescriptions
-            ];
-    
-    
-        })->toArray();
-    
-        generateLabsReport($visits);
-    
-        dd("done");
+            
+            foreach($search as $item)
+            {
+                return (strpos($diagnosis, $item) !== false);
+            }
+        }
     });
-    
-    
-    function getPrescriptions($prescriptions)
+
+    $visits = $visits->transform(function($visit){
+        
+        $patient = $visit->patients;
+
+        $diagnosis = $visit->notes->diagnosis;
+
+        $prescriptions = getPrescriptions($visit->prescriptions);
+
+        return [
+            'visit_date' => \Carbon\Carbon::parse($visit->created_at)->toDateTimeString(),
+
+            'patient_id' => $patient->patient_no,
+
+            'patient_name' => $patient->fullName,
+
+            'phone_number' => $patient->mobile,
+
+            'age' => $patient->age,
+
+            'gender' => $patient->sex,
+
+            'residence' => $patient->town,
+
+            'visit_type' => getVisitType($visit),
+
+            'bp_systolic' => $visit->vitals ? $visit->vitals->bp_systolic : '',
+
+            'bp_diastolic' => $visit->vitals ? $visit->vitals->bp_diastolic : '',
+
+            'weight' => $visit->vitals ? $visit->vitals->weight : '',
+
+            'diagnosis' => $diagnosis,
+
+            'treatment' => $prescriptions
+        ];
+
+    })->toArray();
+
+    generateLabsReport($visits);
+
+    dd("done");
+});
+
+
+function getPrescriptions($prescriptions)
+{
+    $data = "";
+
+    if(!$prescriptions)
     {
-        $data = "";
+        return $data;
+    }
     
-        $prescriptions->each(function($prescription) use(&$data){
-    
-            $prescription->load('drugs');
-    
-            $data .= $prescription->drugs->name . ", ";
+    $prescriptions->each(function($prescription) use(&$data){
+
+        $prescription->load('drugs');
+
+        $data .= $prescription->drugs->name . ", ";
+    });
+
+    return trim($data, ', ');
+}
+
+function getVisitType($visit)
+{
+    $patient = $visit->patients;
+
+    $visits = \Ignite\Evaluation\Entities\Visit::where('patient', $patient->id)->count();
+
+    return $visits == 1 ? "New" : "Existing";
+}
+
+/*
+* Generates a lab report and downloads it to an excel
+*/
+function generateLabsReport($visits)
+{
+    ob_clean();
+
+    \Excel::create('hypertension_diabetes', function($excel) use($visits){
+
+        $excel->sheet('hypertension_diabetes', function($sheet) use($visits){
+
+            $sheet->row(1, ['Visit date', 'Patient ID', 'Patient Name', 'Phone', 'Age', 'Gender', 'Residence', 'Visit Type', 'Bp Systolic', 'Bp Diastolic', 'Weight', 'Diagnosis', 'Treatment']);
+
+            $sheet->freezeFirstRow();
+
+            foreach($visits as $report)
+            {
+                $sheet->appendRow([
+                    $report['visit_date'],
+                    $report['patient_id'],
+                    $report['patient_name'],
+                    $report['phone_number'],
+                    $report['age'],
+                    $report['gender'],
+                    $report['residence'],
+                    $report['visit_type'],
+                    $report['bp_systolic'],
+                    $report['bp_diastolic'],
+                    $report['weight'],
+                    trim($report['diagnosis']),
+                    $report['treatment'],
+                ]);
+            }
+
         });
-    
-        return trim($data, ', ');
-    }
-    
-    
-    
-    
-    /*
-    * Generates a lab report and downloads it to an excel
-    */
-    function generateLabsReport($visits)
-    {
-        ob_clean();
-    
-        \Excel::create('hypertension_diabetes', function($excel) use($visits){
-    
-            $excel->sheet('hypertension_diabetes', function($sheet) use($visits){
-    
-                $sheet->row(1, ['Visit date', 'Patient ID', 'Patient Name', 'Phone', 'Age', 'Gender', 'Residence', 'Visit Type', 'Bp Systolic', 'Bp Diastolic', 'Weight', 'Diagnosis', 'Treatment']);
-    
-                $sheet->freezeFirstRow();
-    
-                foreach($visits as $report)
-                {
-                    $sheet->appendRow([
-                        $report['visit_date'],
-                        $report['patient_id'],
-                        $report['patient_name'],
-                        $report['phone_number'],
-                        $report['age'],
-                        $report['gender'],
-                        $report['residence'],
-                        $report['visit_type'],
-                        $report['bp_systolic'],
-                        $report['bp_diastolic'],
-                        $report['weight'],
-                        trim($report['diagnosis']),
-                        $report['treatment'],
-                    ]);
-                }
-    
-            });
-    
-        })->export('xls');
-    }
 
-
-
-
-
-// /*
-// * patients
-// */
-// $router->get('/patients', function(){
-//     $patients = \Ignite\Reception\Entities\Patients::all()->map(function($patient){
-
-//         return [
-//             'first_name' => $patient->first_name,
-
-//             'middle_name' =>  $patient->middle_name,
-
-//             'last_name' =>  $patient->last_name,
-
-//             'contacts' => $patient->mobile,
-//         ];
-
-//     });
-    
-//     generatePatientReport($patients);
-
-//     dd("Report Downloaded Successfully");
-// });
-
-// /*
-// * Generates a lab report and downloads it to an excel
-// */
-// function generatePatientReport($patients)
-// {
-//     ob_clean();
-
-//     \Excel::create('patient_reports', function($excel) use($patients){
-
-//         $excel->sheet('patients_report', function($sheet) use($patients){
-
-//             $sheet->row(1, ['First Name', 'Middle Name', 'Last Name', 'Contacts']);
-
-//             $sheet->freezeFirstRow();
-
-//             foreach($patients as $report)
-//             {
-//                 $sheet->appendRow([
-//                     $report['first_name'],
-//                     $report['middle_name'],
-//                     $report['last_name'],
-//                     $report['contacts'],
-//                 ]);
-//             }
-
-//         });
-
-//     })->export('xls');
-// }
-
+    })->export('xls');
+}
