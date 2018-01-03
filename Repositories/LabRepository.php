@@ -79,13 +79,13 @@ class LabRepository
 		{
 			$collection = $collection->filter(function($item) use($filter){
 
-                if($item->visits->patients)
+                if($item->visits)
                 {
                     $patientAge = $item->visits->patients->age;
 
                     return ($filter == '5') ? $patientAge <= 5 : $patientAge > 5;
                 }
-                
+
 			});
 		}
 
