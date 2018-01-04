@@ -42,17 +42,23 @@ $router->match(['post', 'get'], 'client/depatments', ['uses' => 'ClientDepartmen
 $router->match(['post', 'get'], 'client/doctors', ['uses' => 'ClientDoctorsController@index', 'as' => 'client.doctors']);
 
 
+$router->get('/hyper-tension', function () {
 
-
-$router->get('/hyper-tension', function(){
-    
     $rangeStart = \Carbon\Carbon::createFromDate(2017, 12, 1);
 
     $rangeEnd = \Carbon\Carbon::createFromDate(2017, 12, 31);
 
-    $visits = \Ignite\Evaluation\Entities\Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])->get();
+    $visits = \Ignite\Evaluation\Entities\Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])
+        ->whereHas('notes', function (\Illuminate\Database\Eloquent\Builder $query) {
+            $search = ['htn', 'hypertension', 'dm', 'diabetes'];
+            foreach ($search as $like) {
+                $query->where('diagnosis', 'like', '%' . $like . '%');
+            }
+        })
+        ->get();
 
     //get the visits doctors notes
+    /*
     $visits = $visits->filter(function($visit){
 
         //get the patients diagnosis
@@ -71,9 +77,9 @@ $router->get('/hyper-tension', function(){
             }
         }
     });
+*/
+    $visits = $visits->transform(function ($visit) {
 
-    $visits = $visits->transform(function($visit){
-        
         $patient = $visit->patients;
 
         $diagnosis = $visit->notes->diagnosis;
@@ -120,12 +126,11 @@ function getPrescriptions($prescriptions)
 {
     $data = "";
 
-    if(!$prescriptions)
-    {
+    if (!$prescriptions) {
         return $data;
     }
-    
-    $prescriptions->each(function($prescription) use(&$data){
+
+    $prescriptions->each(function ($prescription) use (&$data) {
 
         $prescription->load('drugs');
 
@@ -151,16 +156,15 @@ function generateLabsReport($visits)
 {
     ob_clean();
 
-    \Excel::create('hypertension_diabetes', function($excel) use($visits){
+    \Excel::create('hypertension_diabetes', function ($excel) use ($visits) {
 
-        $excel->sheet('hypertension_diabetes', function($sheet) use($visits){
+        $excel->sheet('hypertension_diabetes', function ($sheet) use ($visits) {
 
             $sheet->row(1, ['Visit date', 'Patient ID', 'Patient Name', 'Phone', 'Age', 'Gender', 'Residence', 'Visit Type', 'Bp Systolic', 'Bp Diastolic', 'Weight', 'Diagnosis', 'Treatment']);
 
             $sheet->freezeFirstRow();
 
-            foreach($visits as $report)
-            {
+            foreach ($visits as $report) {
                 $sheet->appendRow([
                     $report['visit_date'],
                     $report['patient_id'],
