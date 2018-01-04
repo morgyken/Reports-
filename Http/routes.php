@@ -64,7 +64,10 @@ $router->get('/hyper-tension', function(){
             
             foreach($search as $searchString)
             {
-                return (strpos(strtolower($diagnosis), $searchString) !== false);
+                if(strpos(strtolower($diagnosis), $searchString))
+                {
+                    return true;
+                }
             }
         }
     });
