@@ -62,9 +62,9 @@ $router->get('/hyper-tension', function(){
         {
             $diagnosis = $visit->notes->diagnosis;
             
-            foreach($search as $item)
+            foreach($search as $searchString)
             {
-                return (strpos($diagnosis, $item) !== false);
+                return (strpos(strtolower($diagnosis), $searchString) !== false);
             }
         }
     });
