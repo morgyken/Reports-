@@ -8,6 +8,7 @@ use Ignite\Evaluation\Entities\DoctorNotes;
 use Ignite\Evaluation\Entities\Investigations;
 use Ignite\Evaluation\Entities\Prescriptions;
 use Ignite\Evaluation\Entities\Visit;
+use Ignite\Evaluation\Entities\Vitals;
 use Ignite\Reception\Entities\Patients;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -131,4 +132,75 @@ class PatientController extends AdminBaseController
         return view('reports::patients.patients', ['data' => $this->data]);
     }
 
+    public function hpdReport()
+    {
+        $rangeStart = Carbon::createFromDate(2017, 12, 1);
+
+        $rangeEnd = Carbon::createFromDate(2017, 12, 31);
+
+        $visits = Visit::whereBetween('created_at', [$rangeStart, $rangeEnd])
+            ->whereHas('notes', function (Builder $query) {
+                $query->whereNotNull('diagnosis');
+                $query->where(function (Builder $query) {
+                    $search = ['htn', 'hypertension', 'dm', 'diabetes'];
+                    foreach ($search as $like) {
+                        $query->orWhere('diagnosis', 'like', '%' . $like . '%');
+                    }
+                });
+
+            })
+            ->get();
+        $visits = $visits->transform(function ($visit) {
+
+            $patient = $visit->patients;
+
+            $diagnosis = $visit->notes->diagnosis;
+
+            $prescriptions = getPrescriptions($visit->prescriptions);
+
+            return [
+                'visit_date' => Carbon::parse($visit->created_at)->toDateTimeString(),
+
+                'patient_id' => $patient->patient_no,
+
+                'patient_name' => $patient->fullName,
+
+                'phone_number' => $patient->mobile,
+
+                'age' => $patient->age,
+
+                'gender' => $patient->sex,
+
+                'residence' => $patient->town,
+
+                'visit_type' => getVisitType($visit),
+
+                'bp_systolic' => $visit->vitals->bp_systolic ?? $this->anyVitals($visit, 'bp_systolic'),
+
+                'bp_diastolic' => $visit->vitals->bp_diastolic ?? $this->anyVitals($visit, 'bp_diastolic'),
+
+                'weight' => $visit->vitals ? $visit->vitals->weight : '',
+
+                'diagnosis' => $diagnosis,
+
+                'treatment' => $prescriptions
+            ];
+
+        })->toArray();
+        generateLabsReport($visits);
+
+        dd("done");
+    }
+
+    private function anyVitals(Visit $visit, $vital)
+    {
+        $patient_visits = Visit::wherePatient($visit->patient)->latest()->get();
+        foreach ($patient_visits as $v) {
+            $_v = @$v->vitals->{$vital};
+            if (!empty($_v)) {
+                return $_v;
+            }
+        }
+        return '';
+    }
 }
