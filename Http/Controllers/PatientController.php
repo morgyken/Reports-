@@ -179,7 +179,7 @@ class PatientController extends AdminBaseController
 
                 'bp_diastolic' => $visit->vitals->bp_diastolic ?? $this->anyVitals($visit, 'bp_diastolic'),
 
-                'weight' => $visit->vitals ? $visit->vitals->weight : '',
+                'weight' => $visit->vitals->weight ?? $this->anyVitals($visit, 'weight'),
 
                 'diagnosis' => $diagnosis,
 
