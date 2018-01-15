@@ -8,24 +8,17 @@
         <div class="box-body">
             <div class="box-header">
                 <div class="row">
-                    <div class="col-md-12">
-                        {!! Form::open(['class'=>'form-inline'])!!}
-                            <label>Start Date:</label>
-                            <input type="text" id="start" name="filters[date][start]" class="form-control" value="{{ $dateFilters['start'] }}" />
-                            <label>End Date:</label>
-                            <input type="text" id="end" name="filters[date][end]" class="form-control" value="{{ $dateFilters['end'] }}" />
-                            
-                            <!-- <select name="" id="">
-                                @foreach()  
-                                    <option value=""></option>
-                                @endforeach 
-                            </select> -->
-                            
-                            <button type="submit" id="clearBtn" class="btn btn-primary btn-sm" name="filter">
-                                <i class="fa fa-filter"></i> Apply Filters 
-                            </button>
-                        {!! Form::close()!!}
-                    </div>
+                    {{--<div class="col-md-12">--}}
+                        {{--{!! Form::open(['class'=>'form-inline'])!!}--}}
+                            {{--<label>Start Date:</label>--}}
+                            {{--<input type="text" id="start" name="filters[date][start]" class="form-control" value="{{ $dateFilters['start'] }}" />--}}
+                            {{--<label>End Date:</label>--}}
+                            {{--<input type="text" id="end" name="filters[date][end]" class="form-control" value="{{ $dateFilters['end'] }}" />--}}
+                            {{--<button type="submit" id="clearBtn" class="btn btn-primary btn-sm" name="filter">--}}
+                                {{--<i class="fa fa-filter"></i> Apply Filters --}}
+                            {{--</button>--}}
+                        {{--{!! Form::close()!!}--}}
+                    {{--</div>--}}
                 </div>
             </div>
 
@@ -39,13 +32,19 @@
 	            </thead>
 
 	            <tbody>
-	                @foreach($clients as $client)
-	                	<tr>
-	                		<td></td>
-	                		<td>{{ $client['doctor'] }}</td>
-	                		<td>{{ $client['total'] }}</td>
-	                	</tr>
-	                @endforeach
+                    @if(count($clients) > 0)
+                        @foreach($clients as $client)
+                            <tr>
+                                <td></td>
+                                <td>{{ $client['doctor'] }}</td>
+                                <td>{{ $client['total'] }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td>No data found</td>
+                        </tr>
+                    @endif
 	            </tbody>
 	            
 	        </table>
