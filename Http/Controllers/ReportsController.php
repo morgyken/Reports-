@@ -2,103 +2,64 @@
 
 namespace Ignite\Reports\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
-use Ignite\Evaluation\Entities\Investigations;
+use Ignite\Core\Http\Controllers\AdminBaseController;
 
-class ReportsController extends Controller
+use Carbon\Carbon;
+use Ignite\Evaluation\Entities\Visit;
+
+class ReportsController extends AdminBaseController
 {
-    /**
-     * Display a listing of the resource.
-     * @return Response
-     */
-    public function index()
-    {
-        return view('reports::index');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     * @return Response
-     */
-    public function create()
-    {
-        return view('reports::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param  Request $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-    }
-
-    /**
-     * Show the specified resource.
-     * @return Response
-     */
-    public function show()
-    {
-        return view('reports::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @return Response
-     */
-    public function edit()
-    {
-        return view('reports::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param  Request $request
-     * @return Response
-     */
-    public function update(Request $request)
-    {
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @return Response
-     */
-    public function destroy()
-    {
-    }
-
+    protected $clientRepository;
 
     /*
-    * Generates the reports based on the type of report
+    * Inject the dependencies into the class
     */
-    public function generate()
+    public function __construct()
     {
-        dd("here");
+        parent::__construct();
+    }
 
-        // $investigations = Investigations::with(['procedures'])->get();
+    /*
+     * Display a listing of the resource.
+     */
+    public function hypertension()
+    {
+        $visits = $this->getVisitsBasedOnDate();
 
-        // Excel::create('Filename', function($excel) use($investigations) {
+        $start = session('hbdStart');
 
-        //     $excel->sheet('Sheetname', function($sheet) use($investigations) {
+        $end = session('hbdEnd');
 
-        //         $sheet->freezeFirstRow();
+        return view('reports::reports.hypertension', compact('start', 'end', 'visits'));
+    }
 
-        //         $sheet->row(1, [
-        //             'procedure', 'quantity'
-        //         ]);
+    public function getVisitsBasedOnDate()
+    {
+        session()->forget(['hbdStart', 'hbdEnd']);
 
-        //         $investigations->each(function( $investigation ){
-        //             $sheet->appendRow(2, array(
-        //                 'appended', 'appended'
-        //             ));
-        //         });
+        $search = ['htn', 'hypertension', 'dm', 'diabetes'];
 
-        //     });
+        $visits = Visit::whereHas('notes', function ($query) use ($search){
+            foreach ($search as $index => $item) {
+                $index == 0 ? $query->where('diagnosis', 'like', "%$item%")
 
-        // })->export('xls');
+                        : $query->orWhere('diagnosis', 'like', "%$item%");
+            }
+        })->with(['notes', 'vitals']);
+
+        if(!is_null(request('start')) or !is_null(request('end')))
+        {
+            $hbdStart = is_null(request('start')) ? Carbon::parse('first day of January 2017') : Carbon::parse(request('start'))->startOfDay();
+
+            $hbdEnd = Carbon::parse(request('end'))->endOfDay();
+
+            session(compact('hbdStart', 'hbdEnd'));
+
+            return $visits->whereDate('created_at', '>=', session('hbdStart'))
+                          ->whereDate('created_at', '<=', session('hbdEnd'))
+                          ->get();
+        }
+
+        return $visits->get();
     }
 }
