@@ -32,7 +32,7 @@
                             <td>{{ $visit->patients->age }}</td>
                             <td>{{ $visit->patients->sex }}</td>
                             <td>{{ $visit->patients->town }}</td>
-                            <td>{{ $visit->visit_type }}</td>
+                            <td>{{ $visit->notes->visit_type }}</td>
                             <td>{{ @$visit->vitals->bp_systolic}}</td>
                             <td>{{ @$visit->vitals->bp_diastolic}}</td>
                             <td>{{ @$visit->vitals->weight}}</td>
