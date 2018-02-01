@@ -36,7 +36,7 @@
                             <td>{{ @$visit->vitals->bp_systolic}}</td>
                             <td>{{ @$visit->vitals->bp_diastolic}}</td>
                             <td>{{ @$visit->vitals->weight}}</td>
-                            <td>{{ $visit->diagnosis }}</td>
+                            <td>{{ $visit->notes->diagnosis }}</td>
                             <td>
                                 <?php
                                     $arr = [];
