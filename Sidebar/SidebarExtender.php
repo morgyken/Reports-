@@ -119,9 +119,9 @@ class SidebarExtender implements Panda
                     //  $item->route('evaluation.waiting_nurse');
                     $item->authorize($this->auth->hasAccess('reports.inventory'));
 
-                    $item->item('Stock Report', function (Item $item) {
+                    $item->item('Internal Stores Reports', function (Item $item) {
                         $item->icon('fa fa-hourglass-half');
-                        $item->route('reports.inventory.stocks');
+                        $item->route('reports.store.stocks');
                         // $item->authorize($this->auth->hasAccess('inventory.Reports.View Stock Report'));
                     }); //stock Reports
 

@@ -42,3 +42,12 @@ $router->match(['post', 'get'], 'client/depatments', ['uses' => 'ClientDepartmen
 $router->match(['post', 'get'], 'client/doctors', ['uses' => 'ClientDoctorsController@index', 'as' => 'client.doctors']);
 
 $router->match(['post', 'get'], '/hypertension', ['uses' => 'ReportsController@hypertension', 'as' => 'patients.hypertension']);
+
+//store reports
+$router->get('store/stocks', ['uses' => 'StoreReportController@index', 'as' => 'store.stocks']);
+
+$router->get('store/{id}/stocks', ['uses' => 'StoreReportController@stockReport', 'as' => 'stores.stock']);
+
+$router->get('store/{id}/movement', ['uses' => 'StoreReportController@stockMovement', 'as' => 'store.movement']);
+
+$router->get('store/{id}/expiry', ['uses' => 'StoreReportController@stockExpiry', 'as' => 'store.expiry']);
